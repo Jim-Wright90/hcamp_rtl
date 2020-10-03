@@ -1,28 +1,231 @@
 ---
 title: "HCAMP RTL"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: spacelab
+    highlight: tango 
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
 
-## R Markdown
+```{r, include=FALSE}
+library(tidyverse)
+library(here)
+library(janitor)
+library(rio)
+library(colorblindr)
+library(gghighlight)
+library(forcats)
+library(ggrepel)
+library(gt)
+library(knitr)
+library(kableExtra)
+library(reactable)
+library(plotly)
+library(glue)
+library(fs)
+library(rstatix)
+library(ggpubr)
+library(writexl)
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+theme_set(theme_minimal(15) +
+            theme(legend.position = "bottom",
+                  panel.grid.major.x = element_line(color = "gray60"),
+                  panel.grid.minor.x = element_blank(),
+                  panel.grid.major.y = element_blank())
+          )
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+biif <- import(here("data", "BIIF.xlsx"),
+               setclass = "tbl_df") %>% 
+  janitor::clean_names() %>% 
+  select(c(1:12, 19, 21, 26:32))
+
+biif$onset <- as.Date(biif$onset, format = "%m/%d/%Y")
+biif$rtp_protocol_7 <- as.Date(biif$rtp_protocol_7, format = "%m/%d/%Y")
+biif$rtp_protocol_1_cognitive_physical_rest <- as.Date(biif$rtp_protocol_1_cognitive_physical_rest, format = "%m/%d/%Y")
+biif$rtp_protocol_2_return_to_school_full_time <- as.Date(biif$rtp_protocol_2_return_to_school_full_time, format = "%m/%d/%Y")
+biif$rtp_protocol_3_light_exercise <- as.Date(biif$rtp_protocol_3_light_exercise, format = "%m/%d/%Y")
+biif$rtp_protocol_4_running_no_equipment <- as.Date(biif$rtp_protocol_4_running_no_equipment, format = "%m/%d/%Y")
+biif$rtp_protocol_5_non_contact_drills <- as.Date(biif$rtp_protocol_5_non_contact_drills, format = "%m/%d/%Y")
+biif$rtp_protocol_6_full_contact_practice <- as.Date(biif$rtp_protocol_6_full_contact_practice, format = "%m/%d/%Y")
+biif$rtp_protocol_7_returned_to_full_unrestricted_activity <- as.Date(biif$rtp_protocol_7_returned_to_full_unrestricted_activity, format = "%m/%d/%Y")
+
+str(biif)
+
+oia <- import(here("data", "OIA.xlsx"),
+               setclass = "tbl_df") %>% 
+  janitor::clean_names() %>% 
+  select(c(1:12, 19, 21, 26:32))
+
+oia$onset <- as.Date(oia$onset, format = "%m/%d/%Y")
+oia$rtp_protocol_7 <- as.Date(oia$rtp_protocol_7, format = "%m/%d/%Y")
+oia$rtp_protocol_1_cognitive_physical_rest <- as.Date(oia$rtp_protocol_1_cognitive_physical_rest, format = "%m/%d/%Y")
+oia$rtp_protocol_2_return_to_school_full_time <- as.Date(oia$rtp_protocol_2_return_to_school_full_time, format = "%m/%d/%Y")
+oia$rtp_protocol_3_light_exercise <- as.Date(oia$rtp_protocol_3_light_exercise, format = "%m/%d/%Y")
+oia$rtp_protocol_4_running_no_equipment <- as.Date(oia$rtp_protocol_4_running_no_equipment, format = "%m/%d/%Y")
+oia$rtp_protocol_5_non_contact_drills <- as.Date(oia$rtp_protocol_5_non_contact_drills, format = "%m/%d/%Y")
+oia$rtp_protocol_6_full_contact_practice <- as.Date(oia$rtp_protocol_6_full_contact_practice, format = "%m/%d/%Y")
+oia$rtp_protocol_7_returned_to_full_unrestricted_activity <- as.Date(oia$rtp_protocol_7_returned_to_full_unrestricted_activity, format = "%m/%d/%Y")
+
+
+kif <- import(here("data", "KIF.xlsx"),
+               setclass = "tbl_df") %>% 
+  janitor::clean_names() %>% 
+  select(c(1:12, 19, 21, 26:32))
+
+
+kif$onset <- as.Date(kif$onset, format = "%m/%d/%Y")
+kif$rtp_protocol_7 <- as.Date(kif$rtp_protocol_7, format = "%m/%d/%Y")
+kif$rtp_protocol_1_cognitive_physical_rest <- as.Date(kif$rtp_protocol_1_cognitive_physical_rest, format = "%m/%d/%Y")
+kif$rtp_protocol_2_return_to_school_full_time <- as.Date(kif$rtp_protocol_2_return_to_school_full_time, format = "%m/%d/%Y")
+kif$rtp_protocol_3_light_exercise <- as.Date(kif$rtp_protocol_3_light_exercise, format = "%m/%d/%Y")
+kif$rtp_protocol_4_running_no_equipment <- as.Date(kif$rtp_protocol_4_running_no_equipment, format = "%m/%d/%Y")
+kif$rtp_protocol_5_non_contact_drills <- as.Date(kif$rtp_protocol_5_non_contact_drills, format = "%m/%d/%Y")
+kif$rtp_protocol_6_full_contact_practice <- as.Date(kif$rtp_protocol_6_full_contact_practice, format = "%m/%d/%Y")
+kif$rtp_protocol_7_returned_to_full_unrestricted_activity <- as.Date(kif$rtp_protocol_7_returned_to_full_unrestricted_activity, format = "%m/%d/%Y")
+
+
+mil <- import(here("data", "MIL.xlsx"),
+               setclass = "tbl_df") %>% 
+  janitor::clean_names() %>% 
+  select(c(1:12, 19, 21, 26:32))
+
+
+mil$onset <- as.Date(mil$onset, format = "%m/%d/%Y")
+mil$rtp_protocol_7 <- as.Date(mil$rtp_protocol_7, format = "%m/%d/%Y")
+mil$rtp_protocol_1_cognitive_physical_rest <- as.Date(mil$rtp_protocol_1_cognitive_physical_rest, format = "%m/%d/%Y")
+mil$rtp_protocol_2_return_to_school_full_time <- as.Date(mil$rtp_protocol_2_return_to_school_full_time, format = "%m/%d/%Y")
+mil$rtp_protocol_3_light_exercise <- as.Date(mil$rtp_protocol_3_light_exercise, format = "%m/%d/%Y")
+mil$rtp_protocol_4_running_no_equipment <- as.Date(mil$rtp_protocol_4_running_no_equipment, format = "%m/%d/%Y")
+mil$rtp_protocol_5_non_contact_drills <- as.Date(mil$rtp_protocol_5_non_contact_drills, format = "%m/%d/%Y")
+mil$rtp_protocol_6_full_contact_practice <- as.Date(mil$rtp_protocol_6_full_contact_practice, format = "%m/%d/%Y")
+mil$rtp_protocol_7_returned_to_full_unrestricted_activity <- as.Date(mil$rtp_protocol_7_returned_to_full_unrestricted_activity, format = "%m/%d/%Y")
+
+str(kif)
+str(mil)
+str(biif)
+str(oia)
+
+
+all_leagues <- bind_rows(biif, oia, kif, mil, .id = "dataset")
+
+all_leagues <- all_leagues %>% 
+  mutate(age = round(age))
+  
+
+mean_2 <- function(x) {
+  z <- na.omit(x)
+  sum(z) / length(z)
+}
+
+my_mean <- function(x) {
+  mean(x[x >= 0], na.rm = TRUE)
+}
+
+mean_2(all_leagues$days_missed)
+my_mean(all_leagues$days_missed)
+
+
+create_react_time <- function(df, var) {
+    df %>% 
+      summarize(Mean = mean({{var}}),
+                SD = sd({{var}}),
+                Min = min({{var}}),
+                Max = max({{var}}),
+                Total = length({{var}})) %>% 
+      mutate_if(is.numeric, round, 2) %>% 
+      reactable(columns = list(
+        Mean = colDef(format = colFormat(separators = TRUE, suffix = " days")),
+        SD = colDef(format = colFormat(separators = TRUE, suffix = " days")),
+        Min = colDef(format = colFormat(separators = TRUE, suffix = " days")),
+        Max = colDef(format = colFormat(separators = TRUE, suffix = " days")),
+        Total = colDef(format = colFormat(separators = TRUE, suffix = " concussions"))
+      ))
+}
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+```{r, include=FALSE}
+#identifying concussion injuries 
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+all_leagues$injury
+
+all_concussion <- all_leagues %>% 
+  filter(injury == "Head Concussion") %>% 
+  mutate(days_between_onset_rtp_7 = rtp_protocol_7 - onset) %>% 
+  drop_na(onset, rtp_protocol_7) %>% 
+  mutate(days_between_onset_rtp_7 = as.numeric(days_between_onset_rtp_7)) 
+
+
+mean_2(all_concussion$days_between_onset_rtp_7)
+
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## RTL Brief Summary 
+
+### RTP Step 7
+
+This table contains the descriptive statistics of the duration of time from concussion onset to achieving step 7 on the RTP protocol. With missing data removed, this sample consists of 1,413 injuries. 
+
+```{r, include=TRUE}
+create_react_time(all_concussion, days_between_onset_rtp_7)
+```
+
+### RTL (RTP Step 2) {.tabset .tabset-fade .tabset-pills}
+
+The sample was further reduced to remove missing data from the RTP step 2 variable - full return to school. With missing values removed, this sample consists of 997 injuries. 
+
+```{r, include=FALSE}
+all_concussion <- all_leagues %>% 
+  filter(injury == "Head Concussion") %>% 
+  mutate(days_between_onset_rtp_7 = rtp_protocol_7 - onset) %>% 
+  drop_na(onset, rtp_protocol_7) %>% 
+  mutate(days_between_onset_rtp_7 = as.numeric(days_between_onset_rtp_7)) 
+
+
+rtl_step_2 <- all_concussion %>% 
+  mutate(days_between_onset_rtp_2 = rtp_protocol_2_return_to_school_full_time - onset,
+         days_between_rtp_2_rtp_7 = rtp_protocol_7 - rtp_protocol_2_return_to_school_full_time) %>%   drop_na(rtp_protocol_2_return_to_school_full_time) %>% 
+  mutate(days_between_onset_rtp_2 = as.numeric(days_between_onset_rtp_2),
+         days_between_rtp_2_rtp_7 = as.numeric(days_between_rtp_2_rtp_7))
+  
+
+```
+
+#### Time between onset to RTP 2
+
+```{r, include=TRUE}
+create_react_time(rtl_step_2, days_between_onset_rtp_2)
+```
+
+#### Time between RTP 2 to RTP 7
+
+```{r, include=TRUE}
+create_react_time(rtl_step_2, days_between_rtp_2_rtp_7)
+```
+
+
+```{r, include=FALSE}
+files <- dir_ls(here::here("data"), glob = "*.csv")
+
+d <- map_df(files, read_csv, .id = "file",
+                 col_types = cols(.default = "c")) %>% 
+  modify(~parse_guess(.x)) %>% 
+  janitor::clean_names() %>% 
+  mutate(year = parse_number(file)) %>% 
+  mutate(year = as.factor(year))
+
+d <- d %>% 
+  mutate(first_name = str_to_title(first_name),
+         last_name = str_to_title(last_name))
+
+```
+
+
+
