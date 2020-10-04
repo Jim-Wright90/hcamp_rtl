@@ -115,7 +115,12 @@ str(oia)
 all_leagues <- bind_rows(biif, oia, kif, mil, .id = "dataset")
 
 all_leagues <- all_leagues %>% 
-  mutate(age = round(age))
+  mutate(age = round(age)) %>% 
+  mutate(gender = recode(gender,
+                         `F` = "Female",
+                         `M` = "Male"),
+         level = recode(level, 
+                        `JV` = "Junior Varsity"))
   
 
 mean_2 <- function(x) {
@@ -159,56 +164,111 @@ all_concussion <- all_leagues %>%
   filter(injury == "Head Concussion") %>% 
   mutate(days_between_onset_rtp_7 = rtp_protocol_7 - onset) %>% 
   drop_na(onset, rtp_protocol_7) %>% 
-  mutate(days_between_onset_rtp_7 = as.numeric(days_between_onset_rtp_7)) 
+  mutate(days_between_onset_rtp_7 = as.numeric(days_between_onset_rtp_7)) %>% 
+  filter(days_between_onset_rtp_7 >= 0)
 
 
 mean_2(all_concussion$days_between_onset_rtp_7)
 
 
-```
-
-## RTL Brief Summary 
-
-### RTP Step 7
-
-This table contains the descriptive statistics of the duration of time from concussion onset to achieving step 7 on the RTP protocol. With missing data removed, this sample consists of 1,413 injuries. 
-
-```{r, include=TRUE}
-create_react_time(all_concussion, days_between_onset_rtp_7)
-```
-
-### RTL (RTP Step 2) {.tabset .tabset-fade .tabset-pills}
-
-The sample was further reduced to remove missing data from the RTP step 2 variable - full return to school. With missing values removed, this sample consists of 997 injuries. 
-
-```{r, include=FALSE}
-all_concussion <- all_leagues %>% 
+all_rtp <- all_leagues %>% 
   filter(injury == "Head Concussion") %>% 
-  mutate(days_between_onset_rtp_7 = rtp_protocol_7 - onset) %>% 
-  drop_na(onset, rtp_protocol_7) %>% 
-  mutate(days_between_onset_rtp_7 = as.numeric(days_between_onset_rtp_7)) 
-
-
-rtl_step_2 <- all_concussion %>% 
-  mutate(days_between_onset_rtp_2 = rtp_protocol_2_return_to_school_full_time - onset,
-         days_between_rtp_2_rtp_7 = rtp_protocol_7 - rtp_protocol_2_return_to_school_full_time) %>%   drop_na(rtp_protocol_2_return_to_school_full_time) %>% 
-  mutate(days_between_onset_rtp_2 = as.numeric(days_between_onset_rtp_2),
-         days_between_rtp_2_rtp_7 = as.numeric(days_between_rtp_2_rtp_7))
+  drop_na(onset, 
+          rtp_protocol_1_cognitive_physical_rest, 
+          rtp_protocol_2_return_to_school_full_time,
+          rtp_protocol_3_light_exercise,
+          rtp_protocol_4_running_no_equipment,
+          rtp_protocol_5_non_contact_drills,
+          rtp_protocol_6_full_contact_practice,
+          rtp_protocol_7,
+          rtp_protocol_7_returned_to_full_unrestricted_activity) %>% 
+  mutate(days_between_onset_rtp_1 = rtp_protocol_1_cognitive_physical_rest - onset,
+         days_between_rtp_1_rtp_2 = rtp_protocol_2_return_to_school_full_time - rtp_protocol_1_cognitive_physical_rest,
+         days_between_rtp_2_rtp_3 = rtp_protocol_3_light_exercise - rtp_protocol_2_return_to_school_full_time,
+         days_between_rtp_3_rtp_4 = rtp_protocol_4_running_no_equipment - rtp_protocol_3_light_exercise,
+         days_between_rtp_4_rtp_5 = rtp_protocol_5_non_contact_drills - rtp_protocol_4_running_no_equipment,
+         days_between_rtp_5_rtp_6 = rtp_protocol_6_full_contact_practice - rtp_protocol_5_non_contact_drills,
+         days_between_rtp_6_rtp_7 = rtp_protocol_7 - rtp_protocol_6_full_contact_practice,
+         total_rtp_days = rtp_protocol_7 - onset) %>% 
+  mutate(days_between_onset_rtp_1 = as.numeric(days_between_onset_rtp_1),
+         days_between_rtp_1_rtp_2 = as.numeric(days_between_rtp_1_rtp_2),
+         days_between_rtp_2_rtp_3 = as.numeric(days_between_rtp_2_rtp_3),
+         days_between_rtp_3_rtp_4 = as.numeric(days_between_rtp_3_rtp_4),
+         days_between_rtp_4_rtp_5 = as.numeric(days_between_rtp_4_rtp_5),
+         days_between_rtp_5_rtp_6 = as.numeric(days_between_rtp_5_rtp_6),
+         days_between_rtp_6_rtp_7 = as.numeric(days_between_rtp_6_rtp_7),
+         total_rtp_days = as.numeric(total_rtp_days))
   
+all_rtp %>% 
+  count(last_name) %>% 
+  reactable()
 
 ```
 
-#### Time between onset to RTP 2
+## RTL Brief Summary {.tabset .tabset-fade .tabset-pills}
+
+To recreate a data frame with the similar variables used in the Tamura et al. (2020) paper, missing data was removed to isolate injuries with specified dates for each RTP stage. New variables were then created to represent the number of days between: 
+
+* Onset and RTP 1
+* RTP 1 and RTP 2
+* RTP 2 and RTP 3
+* RTP 3 and RTP 4
+* RTP 4 and RTP 5
+* RTP 5 and RTP 6
+* RTP 6 and RTP 7
+* Total number of days from onset to RTP 7
+
+With missing data from the individual RTP dates removed, the sample consists of 850 injuries. 
+
+### Onset to RTP 1
 
 ```{r, include=TRUE}
-create_react_time(rtl_step_2, days_between_onset_rtp_2)
+create_react_time(all_rtp, days_between_onset_rtp_1)
 ```
 
-#### Time between RTP 2 to RTP 7
+### RTP 1 to RTP 2
 
 ```{r, include=TRUE}
-create_react_time(rtl_step_2, days_between_rtp_2_rtp_7)
+create_react_time(all_rtp, days_between_rtp_1_rtp_2)
 ```
+
+### RTP 2 to RTP 3
+
+```{r, include=TRUE}
+create_react_time(all_rtp, days_between_rtp_2_rtp_3)
+```
+
+### RTP 3 to RTP 4
+
+```{r, include=TRUE}
+create_react_time(all_rtp, days_between_rtp_3_rtp_4)
+```
+
+### RTP 4 to RTP 5
+
+```{r, include=TRUE}
+create_react_time(all_rtp, days_between_rtp_4_rtp_5)
+```
+
+### RTP 5 to RTP 6
+
+```{r, include=TRUE}
+create_react_time(all_rtp, days_between_rtp_5_rtp_6)
+```
+
+### RTP 6 to RTP 7
+
+```{r, include=TRUE}
+create_react_time(all_rtp, days_between_rtp_6_rtp_7)
+```
+
+### Onset to RTP 7
+
+```{r, include=TRUE}
+create_react_time(all_rtp, total_rtp_days)
+```
+
+
 
 
 ```{r, include=FALSE}
@@ -225,7 +285,294 @@ d <- d %>%
   mutate(first_name = str_to_title(first_name),
          last_name = str_to_title(last_name))
 
+impact <- d %>% 
+  select(year,
+         passport_id, 
+         first_name,
+         last_name,
+         user_gender,
+         user_age,
+         user_current_sport,
+         user_number_of_concussions,
+         test_date,
+         test_type,
+         user_memory_composite_score_verbal,
+         user_memory_composite_score_visual,
+         user_visual_motor_composite_score,
+         user_impulse_control_composite_score,
+         user_reaction_time_composite_score,
+         user_symptom1,
+         user_symptom2,
+         user_symptom3,
+         user_symptom4,
+         user_symptom5,
+         user_symptom6,
+         user_symptom7,
+         user_symptom8,
+         user_symptom9,
+         user_symptom10,
+         user_symptom11,
+         user_symptom12,
+         user_symptom13,
+         user_symptom14,
+         user_symptom15,
+         user_symptom16,
+         user_symptom17,
+         user_symptom18,
+         user_symptom19,
+         user_symptom20,
+         user_symptom21,
+         user_symptom22,
+         user_total_symptom_score) %>% 
+  rename(gender = user_gender,
+         age = user_age,
+         current_sport = user_current_sport,
+         number_of_concussions = user_number_of_concussions,
+         verbal_memory = user_memory_composite_score_verbal,
+         visual_memory = user_memory_composite_score_visual, 
+         visual_motor = user_visual_motor_composite_score,
+         impulse_control = user_impulse_control_composite_score,
+         reaction_time = user_reaction_time_composite_score,
+         symptom_1 = user_symptom1,
+         symptom_2 = user_symptom2,
+         symptom_3 = user_symptom3,
+         symptom_4 = user_symptom4,
+         symptom_5 = user_symptom5,
+         symptom_6 = user_symptom6,
+         symptom_7 = user_symptom7,
+         symptom_8 = user_symptom8,
+         symptom_9 = user_symptom9,
+         symptom_10 = user_symptom10,
+         symptom_11 = user_symptom11,
+         symptom_12 = user_symptom12,
+         symptom_13 = user_symptom13,
+         symptom_14 = user_symptom14,
+         symptom_15 = user_symptom15,
+         symptom_16 = user_symptom16,
+         symptom_17 = user_symptom17,
+         symptom_18 = user_symptom18,
+         symptom_19 = user_symptom19,
+         symptom_20 = user_symptom20,
+         symptom_21 = user_symptom21,
+         symptom_22 = user_symptom22,
+         total_symptom_score = user_total_symptom_score) %>% 
+  mutate(total_somatic_symptom_score = symptom_1 + symptom_2 + symptom_3 + symptom_4 + symptom_5 + symptom_6 + symptom_7 + symptom_8 + symptom_9 + symptom_10 + symptom_11 + symptom_12 + symptom_22,
+         total_psychological_symptom_score = symptom_13 + symptom_14 + symptom_15 + symptom_16 + symptom_17,
+         total_cognitive_symptom_score = symptom_18 + symptom_19 + symptom_20 + symptom_21)
+
+
+impact$test_type
+
+# extracting post-injury 1 test type
+
+impact_post_injury_1 <- impact %>% 
+  filter(test_type == "Post-Injury 1")
+
+
+# attempt at joining RTP and impact post-injury 1 data 
+
+rtp_impact_post_injury_1 <- left_join(all_rtp, impact_post_injury_1)
+
+write_xlsx(rtp_impact_post_injury_1, "rtp_impact_post_injury_1.xlsx")
+
+
+```
+
+## Post-Injury 1 Symptom/Test Score Comparison {.tabset .tabset-fade .tabset-pills}
+
+Post-Injury 1 test and symptom scores were isolated within the ImPACT data set, which consists of 10,042 assessments. To explore the relationship between reported PCSS symptom severity and performance on ImPACT composite scores, PCSS responses were broken down into four categories: 
+
+* Total Symptom Score: Sum of responses of all 22 symptoms
+* Total Somatic Symptom Score: Sum of somatic symptoms 
+* Total Psychological Symptom Score: Sum of psychological symptoms 
+* Total Cognitive Symptom Score: Sum of cognitive symptoms 
+
+Somatic Symptoms: 
+
+* Headache (Item 1)
+* Nausea (Item 2)
+* Vomiting (Item 3)
+* Balance Problems (Item 4)
+* Dizziness (Item 5)
+* Fatigue (Item 6)
+* Trouble falling asleep (Item 7)
+* Excessive sleep (Item 8)
+* Loss of sleep (Item 9)
+* Drowsiness (Item 10)
+* Light sensitivity (Item 11)
+* Noise sensitivity (Item 12)
+* Visual problems (Item 22)
+
+
+Psychological Symptoms
+
+* Irritability (Item 13)
+* Sadness (Item 14)
+* Nervousness (Item 15)
+* More emotional (Item 16)
+* Numbness (Item 17)
+
+
+Cognitive Symptoms 
+
+* Feeling "slow" (Item 18)
+* Feeling "foggy" (Item 19)
+* Difficulty concentrating (Item 20)
+* Difficulty remembering (Item 21)
+
+```{r, include=FALSE}
+
+ggplot(impact_post_injury_1, (aes(verbal_memory, total_symptom_score))) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = lm) +
+  labs(x = "ImPACT Score",
+       y = "PCSS Score")
+
+symptom_scatter <- function(df, x, y) {
+  ggplot(df, (aes({{x}}, {{y}}))) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = lm) +
+  labs(x = "ImPACT Score",
+       y = "PCSS Score")
+}
+
+symptom_scatter(impact_post_injury_1, verbal_memory, total_symptom_score)
+```
+
+### Verbal Memory {.tabset .tabset-fade .tabset-pills}
+
+#### PCSS Total Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, verbal_memory, total_symptom_score)
+```
+
+#### PCSS Somatic Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, verbal_memory, total_somatic_symptom_score)
+```
+
+#### PCSS Psychological Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, verbal_memory, total_psychological_symptom_score)
+```
+
+#### PCSS Cognitive Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, verbal_memory, total_cognitive_symptom_score)
 ```
 
 
+### Visual Memory {.tabset .tabset-fade .tabset-pills}
 
+#### PCSS Total Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, visual_memory, total_symptom_score)
+```
+
+#### PCSS Somatic Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, visual_memory, total_somatic_symptom_score)
+```
+
+#### PCSS Psychological Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, visual_memory, total_psychological_symptom_score)
+```
+
+#### PCSS Cognitive Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, visual_memory, total_cognitive_symptom_score)
+```
+
+
+### Visual Motor {.tabset .tabset-fade .tabset-pills}
+
+#### PCSS Total Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, visual_motor, total_symptom_score)
+```
+
+#### PCSS Somatic Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, visual_motor, total_somatic_symptom_score)
+```
+
+#### PCSS Psychological Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, visual_motor, total_psychological_symptom_score)
+```
+
+#### PCSS Cognitive Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, visual_motor, total_cognitive_symptom_score)
+```
+
+
+### Impulse Control {.tabset .tabset-fade .tabset-pills}
+
+Higher Impulse Control scores indicate poorer performance. 
+
+#### PCSS Total Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, impulse_control, total_symptom_score)
+```
+
+#### PCSS Somatic Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, impulse_control, total_somatic_symptom_score)
+```
+
+#### PCSS Psychological Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, impulse_control, total_psychological_symptom_score)
+```
+
+#### PCSS Cognitive Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, impulse_control, total_cognitive_symptom_score)
+```
+
+
+### Reaction Time {.tabset .tabset-fade .tabset-pills}
+
+Higher Reaction Time scores indicate poorer performance. 
+
+#### PCSS Total Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, reaction_time, total_symptom_score)
+```
+
+#### PCSS Somatic Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, reaction_time, total_somatic_symptom_score)
+```
+
+#### PCSS Psychological Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, reaction_time, total_psychological_symptom_score)
+```
+
+#### PCSS Cognitive Symptom Score Comparison
+
+```{r, include=TRUE}
+symptom_scatter(impact_post_injury_1, reaction_time, total_cognitive_symptom_score)
+```
