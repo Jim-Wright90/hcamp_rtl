@@ -366,7 +366,8 @@ impact$test_type
 # extracting post-injury 1 test type
 
 impact_post_injury_1 <- impact %>% 
-  filter(test_type == "Post-Injury 1")
+  filter(test_type == "Post-Injury 1") %>% 
+  na.omit()
 
 
 # attempt at joining RTP and impact post-injury 1 data 
@@ -575,4 +576,154 @@ symptom_scatter(impact_post_injury_1, reaction_time, total_psychological_symptom
 
 ```{r, include=TRUE}
 symptom_scatter(impact_post_injury_1, reaction_time, total_cognitive_symptom_score)
+```
+
+## Post-Injury 1 ImPACT and PCSS Descriptive Statistics {.tabset .tabset-fade .tabset-pills}
+
+```{r, include=FALSE}
+create_react_score <- function(df, var) {
+    df %>% 
+      summarize(Mean = mean({{var}}),
+                SD = sd({{var}}),
+                Min = min({{var}}),
+                Max = max({{var}}),
+                Total = length({{var}})) %>% 
+      mutate_if(is.numeric, round, 2) %>% 
+      reactable(columns = list(
+        Mean = colDef(format = colFormat(separators = TRUE)),
+        SD = colDef(format = colFormat(separators = TRUE)),
+        Min = colDef(format = colFormat(separators = TRUE)),
+        Max = colDef(format = colFormat(separators = TRUE)),
+        Total = colDef(format = colFormat(separators = TRUE, suffix = " concussions"))
+      ))
+}
+
+score_hist <- function(df, x) {
+  ggplot(df, aes({{x}})) +
+  geom_histogram(fill = "#56B4E9",
+                color = "white", 
+                alpha = 0.9,
+                bins = 25) +
+  labs(x = "Score",
+       y = "Number of Concussions")
+}
+```
+
+### ImPACT {.tabset .tabset-fade .tabset-pills}
+
+#### Verbal Memory Summary
+
+```{r, include=TRUE}
+create_react_score(impact_post_injury_1, verbal_memory)
+```
+
+#### Verbal Memory Distribution
+
+```{r, include=TRUE}
+score_hist(impact_post_injury_1, verbal_memory)
+```
+
+#### Visual Memory Summary
+
+```{r, include=TRUE}
+create_react_score(impact_post_injury_1, visual_memory)
+```
+
+#### Visual Memory Distribution
+
+```{r, include=TRUE}
+score_hist(impact_post_injury_1, visual_memory)
+```
+
+#### Visual Motor Summary
+
+```{r, include=TRUE}
+create_react_score(impact_post_injury_1, visual_motor)
+```
+
+#### Visual Motor Distribution
+
+```{r, include=TRUE}
+score_hist(impact_post_injury_1, visual_motor)
+```
+
+
+#### Impulse Control Summary
+
+```{r, include=TRUE}
+create_react_score(impact_post_injury_1, impulse_control)
+```
+
+#### Impulse Control Distribution
+
+```{r, include=TRUE}
+score_hist(impact_post_injury_1, impulse_control)
+```
+
+#### Reaction Time Summary
+
+```{r, include=TRUE}
+create_react_score(impact_post_injury_1, reaction_time)
+```
+
+#### Reaction Time Distribution
+
+```{r, include=TRUE}
+score_hist(impact_post_injury_1, reaction_time)
+```
+
+
+### PCSS {.tabset .tabset-fade .tabset-pills}
+
+* Total Symptom Score: 22 items (Total possible score of 132)
+* Total Somatic Symptom Score: 13 items (Total possible score 78)
+* Total Psychological Symptom Score: 5 items (Total possible score of 30)
+* Total Cognitive Symptom Score: 4 items (Total possible score of 24)
+
+#### Total Symptom Score
+
+```{r, include=TRUE}
+create_react_score(impact_post_injury_1, total_symptom_score)
+```
+
+#### Total Symptom Distribution 
+
+```{r, include=TRUE}
+score_hist(impact_post_injury_1, total_symptom_score)
+```
+
+#### Somatic Symptom Score
+
+```{r, include=TRUE}
+create_react_score(impact_post_injury_1, total_somatic_symptom_score)
+```
+
+#### Somatic Symptom Distribution 
+
+```{r, include=TRUE}
+score_hist(impact_post_injury_1, total_somatic_symptom_score)
+```
+
+#### Psychological Symptom Score
+
+```{r, include=TRUE}
+create_react_score(impact_post_injury_1, total_psychological_symptom_score)
+```
+
+#### Psychological Symptom Distribution 
+
+```{r, include=TRUE}
+score_hist(impact_post_injury_1, total_psychological_symptom_score)
+```
+
+#### Cognitive Symptom Score
+
+```{r, include=TRUE}
+create_react_score(impact_post_injury_1, total_cognitive_symptom_score)
+```
+
+#### Cognitive Symptom Distribution 
+
+```{r, include=TRUE}
+score_hist(impact_post_injury_1, total_cognitive_symptom_score)
 ```
