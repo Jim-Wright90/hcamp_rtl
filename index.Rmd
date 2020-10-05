@@ -433,11 +433,11 @@ symptom_scatter <- function(df, x, y) {
   ggplot(df, (aes({{x}}, {{y}}))) +
   geom_point(alpha = 0.3) +
   geom_smooth(method = lm) +
-  labs(x = "ImPACT Score",
-       y = "PCSS Score")
+  labs(x = "PCSS Score",
+       y = "ImPACT Score")
 }
 
-symptom_scatter(impact_post_injury_1, verbal_memory, total_symptom_score)
+symptom_scatter(impact_post_injury_1, total_symptom_score, verbal_memory)
 ```
 
 ### Verbal Memory {.tabset .tabset-fade .tabset-pills}
@@ -445,25 +445,25 @@ symptom_scatter(impact_post_injury_1, verbal_memory, total_symptom_score)
 #### PCSS Total Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, verbal_memory, total_symptom_score)
+symptom_scatter(impact_post_injury_1, total_symptom_score, verbal_memory)
 ```
 
 #### PCSS Somatic Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, verbal_memory, total_somatic_symptom_score)
+symptom_scatter(impact_post_injury_1, total_somatic_symptom_score, verbal_memory)
 ```
 
 #### PCSS Psychological Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, verbal_memory, total_psychological_symptom_score)
+symptom_scatter(impact_post_injury_1, total_psychological_symptom_score, verbal_memory)
 ```
 
 #### PCSS Cognitive Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, verbal_memory, total_cognitive_symptom_score)
+symptom_scatter(impact_post_injury_1, total_cognitive_symptom_score, verbal_memory)
 ```
 
 
@@ -472,25 +472,25 @@ symptom_scatter(impact_post_injury_1, verbal_memory, total_cognitive_symptom_sco
 #### PCSS Total Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, visual_memory, total_symptom_score)
+symptom_scatter(impact_post_injury_1, total_symptom_score, visual_memory)
 ```
 
 #### PCSS Somatic Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, visual_memory, total_somatic_symptom_score)
+symptom_scatter(impact_post_injury_1, total_somatic_symptom_score, visual_memory)
 ```
 
 #### PCSS Psychological Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, visual_memory, total_psychological_symptom_score)
+symptom_scatter(impact_post_injury_1, total_psychological_symptom_score, visual_memory)
 ```
 
 #### PCSS Cognitive Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, visual_memory, total_cognitive_symptom_score)
+symptom_scatter(impact_post_injury_1, total_cognitive_symptom_score, visual_memory)
 ```
 
 
@@ -499,25 +499,25 @@ symptom_scatter(impact_post_injury_1, visual_memory, total_cognitive_symptom_sco
 #### PCSS Total Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, visual_motor, total_symptom_score)
+symptom_scatter(impact_post_injury_1, total_symptom_score, visual_motor)
 ```
 
 #### PCSS Somatic Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, visual_motor, total_somatic_symptom_score)
+symptom_scatter(impact_post_injury_1, total_somatic_symptom_score, visual_motor)
 ```
 
 #### PCSS Psychological Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, visual_motor, total_psychological_symptom_score)
+symptom_scatter(impact_post_injury_1, total_psychological_symptom_score, visual_motor)
 ```
 
 #### PCSS Cognitive Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, visual_motor, total_cognitive_symptom_score)
+symptom_scatter(impact_post_injury_1, total_cognitive_symptom_score, visual_motor)
 ```
 
 
@@ -528,25 +528,25 @@ Higher Impulse Control scores indicate poorer performance.
 #### PCSS Total Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, impulse_control, total_symptom_score)
+symptom_scatter(impact_post_injury_1, total_symptom_score, impulse_control)
 ```
 
 #### PCSS Somatic Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, impulse_control, total_somatic_symptom_score)
+symptom_scatter(impact_post_injury_1, total_somatic_symptom_score, impulse_control)
 ```
 
 #### PCSS Psychological Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, impulse_control, total_psychological_symptom_score)
+symptom_scatter(impact_post_injury_1, total_psychological_symptom_score, impulse_control)
 ```
 
 #### PCSS Cognitive Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, impulse_control, total_cognitive_symptom_score)
+symptom_scatter(impact_post_injury_1, total_cognitive_symptom_score, impulse_control)
 ```
 
 
@@ -557,25 +557,25 @@ Higher Reaction Time scores indicate poorer performance.
 #### PCSS Total Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, reaction_time, total_symptom_score)
+symptom_scatter(impact_post_injury_1, total_symptom_score, reaction_time)
 ```
 
 #### PCSS Somatic Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, reaction_time, total_somatic_symptom_score)
+symptom_scatter(impact_post_injury_1, total_somatic_symptom_score, reaction_time)
 ```
 
 #### PCSS Psychological Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, reaction_time, total_psychological_symptom_score)
+symptom_scatter(impact_post_injury_1, total_psychological_symptom_score, reaction_time)
 ```
 
 #### PCSS Cognitive Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, reaction_time, total_cognitive_symptom_score)
+symptom_scatter(impact_post_injury_1, total_cognitive_symptom_score, reaction_time)
 ```
 
 ## Post-Injury 1 ImPACT and PCSS Descriptive Statistics {.tabset .tabset-fade .tabset-pills}
