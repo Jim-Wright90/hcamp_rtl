@@ -152,6 +152,23 @@ create_react_time <- function(df, var) {
         Total = colDef(format = colFormat(separators = TRUE, suffix = " concussions"))
       ))
 }
+
+create_react <- function(df, var) {
+    df %>% 
+      summarize(Mean = mean({{var}}),
+                SD = sd({{var}}),
+                Min = min({{var}}),
+                Max = max({{var}}),
+                Total = length({{var}})) %>% 
+      mutate_if(is.numeric, round, 2) %>% 
+      reactable(columns = list(
+        Mean = colDef(format = colFormat(separators = TRUE)),
+        SD = colDef(format = colFormat(separators = TRUE)),
+        Min = colDef(format = colFormat(separators = TRUE)),
+        Max = colDef(format = colFormat(separators = TRUE)),
+        Total = colDef(format = colFormat(separators = TRUE, suffix = " concussions"))
+      ))
+}
 ```
 
 
@@ -180,95 +197,42 @@ all_rtp <- all_leagues %>%
           rtp_protocol_4_running_no_equipment,
           rtp_protocol_5_non_contact_drills,
           rtp_protocol_6_full_contact_practice,
-          rtp_protocol_7,
-          rtp_protocol_7_returned_to_full_unrestricted_activity) %>% 
-  mutate(days_between_onset_rtp_1 = rtp_protocol_1_cognitive_physical_rest - onset,
-         days_between_rtp_1_rtp_2 = rtp_protocol_2_return_to_school_full_time - rtp_protocol_1_cognitive_physical_rest,
-         days_between_rtp_2_rtp_3 = rtp_protocol_3_light_exercise - rtp_protocol_2_return_to_school_full_time,
-         days_between_rtp_3_rtp_4 = rtp_protocol_4_running_no_equipment - rtp_protocol_3_light_exercise,
-         days_between_rtp_4_rtp_5 = rtp_protocol_5_non_contact_drills - rtp_protocol_4_running_no_equipment,
-         days_between_rtp_5_rtp_6 = rtp_protocol_6_full_contact_practice - rtp_protocol_5_non_contact_drills,
-         days_between_rtp_6_rtp_7 = rtp_protocol_7 - rtp_protocol_6_full_contact_practice,
-         total_rtp_days = rtp_protocol_7 - onset) %>% 
-  mutate(days_between_onset_rtp_1 = as.numeric(days_between_onset_rtp_1),
-         days_between_rtp_1_rtp_2 = as.numeric(days_between_rtp_1_rtp_2),
-         days_between_rtp_2_rtp_3 = as.numeric(days_between_rtp_2_rtp_3),
-         days_between_rtp_3_rtp_4 = as.numeric(days_between_rtp_3_rtp_4),
-         days_between_rtp_4_rtp_5 = as.numeric(days_between_rtp_4_rtp_5),
-         days_between_rtp_5_rtp_6 = as.numeric(days_between_rtp_5_rtp_6),
-         days_between_rtp_6_rtp_7 = as.numeric(days_between_rtp_6_rtp_7),
-         total_rtp_days = as.numeric(total_rtp_days))
+          rtp_protocol_7) %>% 
+  mutate(onset_rtl_total_days = rtp_protocol_2_return_to_school_full_time - onset,
+         rtl_rtp_total_days = rtp_protocol_7 - rtp_protocol_2_return_to_school_full_time,
+         onset_rtp_total_days = rtp_protocol_7 - onset) %>% 
+  mutate(onset_rtl_total_days = as.numeric(onset_rtl_total_days),
+         rtl_rtp_total_days = as.numeric(rtl_rtp_total_days),
+         onset_rtp_total_days = as.numeric(onset_rtp_total_days)) %>% 
+  filter(onset_rtl_total_days >= 0,
+         rtl_rtp_total_days >= 0,
+         onset_rtp_total_days >= 0) 
+
   
 all_rtp %>% 
   count(last_name) %>% 
   reactable()
 
+  
+rtl_update <- all_leagues %>% 
+  filter(injury == "Head Concussion") %>% 
+  select(-c(16, 18, 19, 20, 21, 22)) %>% 
+  mutate(onset_rtl_total_days = rtp_protocol_2_return_to_school_full_time - onset,
+         rtl_rtp_total_days = rtp_protocol_7 - rtp_protocol_2_return_to_school_full_time,
+         onset_rtp_total_days = rtp_protocol_7 - onset) %>% 
+  drop_na(onset, 
+          rtp_protocol_2_return_to_school_full_time, 
+          rtp_protocol_7) %>% 
+  mutate(onset_rtl_total_days = as.numeric(onset_rtl_total_days),
+         rtl_rtp_total_days = as.numeric(rtl_rtp_total_days),
+         onset_rtp_total_days = as.numeric(onset_rtp_total_days)) %>% 
+  filter(onset_rtl_total_days >= 0,
+         rtl_rtp_total_days >= 0,
+         onset_rtp_total_days >= 0) %>% 
+  select(c(1:13, 16, 14, 15, 17, 18, 19))
+  
+
 ```
-
-## RTL Brief Summary {.tabset .tabset-fade .tabset-pills}
-
-To recreate a data frame with the similar variables used in the Tamura et al. (2020) paper, missing data was removed to isolate injuries with specified dates for each RTP stage. New variables were then created to represent the number of days between: 
-
-* Onset and RTP 1
-* RTP 1 and RTP 2
-* RTP 2 and RTP 3
-* RTP 3 and RTP 4
-* RTP 4 and RTP 5
-* RTP 5 and RTP 6
-* RTP 6 and RTP 7
-* Total number of days from onset to RTP 7
-
-With missing data from the individual RTP dates removed, the sample consists of 850 injuries. 
-
-### Onset to RTP 1
-
-```{r, include=TRUE}
-create_react_time(all_rtp, days_between_onset_rtp_1)
-```
-
-### RTP 1 to RTP 2
-
-```{r, include=TRUE}
-create_react_time(all_rtp, days_between_rtp_1_rtp_2)
-```
-
-### RTP 2 to RTP 3
-
-```{r, include=TRUE}
-create_react_time(all_rtp, days_between_rtp_2_rtp_3)
-```
-
-### RTP 3 to RTP 4
-
-```{r, include=TRUE}
-create_react_time(all_rtp, days_between_rtp_3_rtp_4)
-```
-
-### RTP 4 to RTP 5
-
-```{r, include=TRUE}
-create_react_time(all_rtp, days_between_rtp_4_rtp_5)
-```
-
-### RTP 5 to RTP 6
-
-```{r, include=TRUE}
-create_react_time(all_rtp, days_between_rtp_5_rtp_6)
-```
-
-### RTP 6 to RTP 7
-
-```{r, include=TRUE}
-create_react_time(all_rtp, days_between_rtp_6_rtp_7)
-```
-
-### Onset to RTP 7
-
-```{r, include=TRUE}
-create_react_time(all_rtp, total_rtp_days)
-```
-
-
 
 
 ```{r, include=FALSE}
@@ -333,32 +297,36 @@ impact <- d %>%
          visual_motor = user_visual_motor_composite_score,
          impulse_control = user_impulse_control_composite_score,
          reaction_time = user_reaction_time_composite_score,
-         symptom_1 = user_symptom1,
-         symptom_2 = user_symptom2,
-         symptom_3 = user_symptom3,
-         symptom_4 = user_symptom4,
-         symptom_5 = user_symptom5,
-         symptom_6 = user_symptom6,
-         symptom_7 = user_symptom7,
-         symptom_8 = user_symptom8,
-         symptom_9 = user_symptom9,
-         symptom_10 = user_symptom10,
-         symptom_11 = user_symptom11,
-         symptom_12 = user_symptom12,
-         symptom_13 = user_symptom13,
-         symptom_14 = user_symptom14,
-         symptom_15 = user_symptom15,
-         symptom_16 = user_symptom16,
-         symptom_17 = user_symptom17,
-         symptom_18 = user_symptom18,
-         symptom_19 = user_symptom19,
-         symptom_20 = user_symptom20,
-         symptom_21 = user_symptom21,
-         symptom_22 = user_symptom22,
+         pcss_headache = user_symptom1,
+         pcss_nausea = user_symptom2,
+         pcss_vomiting = user_symptom3,
+         pcss_balance_problems = user_symptom4,
+         pcss_dizziness = user_symptom5,
+         pcss_fatigue = user_symptom6,
+         pcss_trouble_falling_asleep = user_symptom7,
+         pcss_excessive_sleep = user_symptom8,
+         pcss_loss_of_sleep = user_symptom9,
+         pcss_drowsiness = user_symptom10,
+         pcss_light_sensitivity = user_symptom11,
+         pcss_noise_sensitivity = user_symptom12,
+         pcss_irritability = user_symptom13,
+         pcss_sadness = user_symptom14,
+         pcss_nervousness = user_symptom15,
+         pcss_more_emotional = user_symptom16,
+         pcss_numbness = user_symptom17,
+         pcss_feeling_slow = user_symptom18,
+         pcss_feeling_foggy = user_symptom19,
+         pcss_difficulty_concentrating = user_symptom20,
+         pcss_difficulty_remembering = user_symptom21,
+         pcss_visual_problems = user_symptom22,
          total_symptom_score = user_total_symptom_score) %>% 
-  mutate(total_somatic_symptom_score = symptom_1 + symptom_2 + symptom_3 + symptom_4 + symptom_5 + symptom_6 + symptom_7 + symptom_8 + symptom_9 + symptom_10 + symptom_11 + symptom_12 + symptom_22,
-         total_psychological_symptom_score = symptom_13 + symptom_14 + symptom_15 + symptom_16 + symptom_17,
-         total_cognitive_symptom_score = symptom_18 + symptom_19 + symptom_20 + symptom_21)
+  mutate(headache_migraine_cluster_score = pcss_headache + pcss_light_sensitivity + pcss_noise_sensitivity,
+         cognitive_cluster_score = pcss_difficulty_concentrating + pcss_difficulty_remembering + pcss_feeling_slow + pcss_feeling_foggy,
+         anxiety_mood_cluster_score = pcss_sadness + pcss_irritability + pcss_more_emotional + pcss_nervousness + pcss_numbness,
+         ocular_motor_cluster_score = pcss_visual_problems,
+         vestibular_cluster_score = pcss_dizziness + pcss_balance_problems + pcss_nausea + pcss_vomiting,
+         sleep_cluster_score = pcss_drowsiness + pcss_fatigue + pcss_trouble_falling_asleep + pcss_excessive_sleep + pcss_loss_of_sleep)
+
 
 
 impact$test_type
@@ -376,354 +344,519 @@ rtp_impact_post_injury_1 <- left_join(all_rtp, impact_post_injury_1)
 
 write_xlsx(rtp_impact_post_injury_1, "rtp_impact_post_injury_1.xlsx")
 
+sims_impact_2 <- rtp_impact_post_injury_1 %>% 
+  drop_na(test_date)
+
+write_xlsx(sims_impact_2, "sims_impact_2.xlsx")
+
+
+# post 10.8.20 meeting where I'm joining Sims and Impact data centered on onset, RTL date, and RTP date from SIMS data and post-injury 1 from impact data
+
+clean_rtl_data <- left_join(rtl_update, impact_post_injury_1)
+
+clean_rtl_data <- clean_rtl_data %>% 
+  na.omit()
+
+# actually wound up with less data than originally had so best to continue with previous file 
+
+
+str(sims_impact_2)
+
+sims_impact_2$test_date <- as.Date(sims_impact_2$test_date, format = "%m/%d/%Y")
+
+str(sims_impact_2)
+
+final_rtl_rtp_data <- sims_impact_2 %>% 
+  mutate(days_between_injury_test_date = test_date - onset) %>% 
+  mutate(days_between_injury_test_date = as.numeric(days_between_injury_test_date))
+
+create_react_time(final_rtl_rtp_data, days_between_injury_test_date)
+
+final_rtl_rtp_data_2 <- final_rtl_rtp_data %>% 
+  filter(days_between_injury_test_date >= 0 & days_between_injury_test_date <= 30)
+
+create_react_time(final_rtl_rtp_data_2, days_between_injury_test_date)
+
+
+#deidentified - use this data set going forward for analyses post 10.8 meeting
+final_rtl_rtp_data_3 <- final_rtl_rtp_data_2 %>% 
+  select(-c(4:5))
+
+write_xlsx(final_rtl_rtp_data_3, "final_rtl_rtp_data_3.xlsx")
 
 ```
 
-## Post-Injury 1 Symptom/Test Score Comparison {.tabset .tabset-fade .tabset-pills}
+## Data Description 
 
-Post-Injury 1 test and symptom scores were isolated within the ImPACT data set, which consists of 10,042 assessments. To explore the relationship between reported PCSS symptom severity and performance on ImPACT composite scores, PCSS responses were broken down into four categories: 
+To create a valid data frame consisting of ImPACT scores, PCSS scores, and RTL/RTP information from the SIMS data set, the following steps were taken: 
 
-* Total Symptom Score: Sum of responses of all 22 symptoms
-* Total Somatic Symptom Score: Sum of somatic symptoms 
-* Total Psychological Symptom Score: Sum of psychological symptoms 
-* Total Cognitive Symptom Score: Sum of cognitive symptoms 
+1. Injuries labeled as "Head Concussion" were identified and isolated from the SIMS data set. 
+2. Three variables were created to represent the duration of time from onset to RTP step 2 (*Return to School Full Time*), RTP step 2 to RTP step 7 (*Full Return to Activity*), and from onset to RTP step 7. These three variables are referred to as:
+  + `onset_rtl_total_days`
+  + `rtl_rtp_total_days`
+  + `onset_rtp_total_days`
+3. Missing data on the dates of injury onset as well as the achievement of RTP steps 2 and 7 was removed. 
+4. Individuals with a duration of time less than 0 days for the aforementioned three variables were removed.
+5. This data set then consisted of 827 injuries
+6. When combined with the ImPACT Post-Injury 1 data set, the removal of missing data left 238 injuries 
+7. A new variable was created (`days_between_injury_test_date`) to quantify the duration of time between the onset date (SIMS data set) and the test date (ImPACT data set). Injuries were kept in the data set if the duration of time from onset to test date was between 0-30 days. With injuries outside this range removed, the new data set to be used for analysis consists of 208 injuries. 
 
-Somatic Symptoms: 
+## Data Exploration - SIMS Demographic Information {.tabset .tabset-fade .tabset-pills}
 
-* Headache (Item 1)
-* Nausea (Item 2)
-* Vomiting (Item 3)
-* Balance Problems (Item 4)
-* Dizziness (Item 5)
-* Fatigue (Item 6)
-* Trouble falling asleep (Item 7)
-* Excessive sleep (Item 8)
-* Loss of sleep (Item 9)
-* Drowsiness (Item 10)
-* Light sensitivity (Item 11)
-* Noise sensitivity (Item 12)
-* Visual problems (Item 22)
-
-
-Psychological Symptoms
-
-* Irritability (Item 13)
-* Sadness (Item 14)
-* Nervousness (Item 15)
-* More emotional (Item 16)
-* Numbness (Item 17)
-
-
-Cognitive Symptoms 
-
-* Feeling "slow" (Item 18)
-* Feeling "foggy" (Item 19)
-* Difficulty concentrating (Item 20)
-* Difficulty remembering (Item 21)
+### Gender 
 
 ```{r, include=FALSE}
-
-ggplot(impact_post_injury_1, (aes(verbal_memory, total_symptom_score))) +
-  geom_point(alpha = 0.3) +
-  geom_smooth(method = lm) +
-  labs(x = "ImPACT Score",
-       y = "PCSS Score")
-
-symptom_scatter <- function(df, x, y) {
-  ggplot(df, (aes({{x}}, {{y}}))) +
-  geom_point(alpha = 0.3) +
-  geom_smooth(method = lm) +
-  labs(x = "PCSS Score",
-       y = "ImPACT Score")
-}
-
-symptom_scatter(impact_post_injury_1, total_symptom_score, verbal_memory)
+gender_total_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(gender) %>% 
+  summarize(total = n()) %>% 
+  reactable(
+    columns = list(
+      gender = colDef(name = "Gender"),
+      total = colDef(name = "Total")),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
 ```
-
-### Verbal Memory {.tabset .tabset-fade .tabset-pills}
-
-#### PCSS Total Symptom Score Comparison
 
 ```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_symptom_score, verbal_memory)
+gender_total_tbl
 ```
 
-#### PCSS Somatic Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_somatic_symptom_score, verbal_memory)
-```
-
-#### PCSS Psychological Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_psychological_symptom_score, verbal_memory)
-```
-
-#### PCSS Cognitive Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_cognitive_symptom_score, verbal_memory)
-```
-
-
-### Visual Memory {.tabset .tabset-fade .tabset-pills}
-
-#### PCSS Total Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_symptom_score, visual_memory)
-```
-
-#### PCSS Somatic Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_somatic_symptom_score, visual_memory)
-```
-
-#### PCSS Psychological Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_psychological_symptom_score, visual_memory)
-```
-
-#### PCSS Cognitive Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_cognitive_symptom_score, visual_memory)
-```
-
-
-### Visual Motor {.tabset .tabset-fade .tabset-pills}
-
-#### PCSS Total Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_symptom_score, visual_motor)
-```
-
-#### PCSS Somatic Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_somatic_symptom_score, visual_motor)
-```
-
-#### PCSS Psychological Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_psychological_symptom_score, visual_motor)
-```
-
-#### PCSS Cognitive Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_cognitive_symptom_score, visual_motor)
-```
-
-
-### Impulse Control {.tabset .tabset-fade .tabset-pills}
-
-Higher Impulse Control scores indicate poorer performance. 
-
-#### PCSS Total Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_symptom_score, impulse_control)
-```
-
-#### PCSS Somatic Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_somatic_symptom_score, impulse_control)
-```
-
-#### PCSS Psychological Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_psychological_symptom_score, impulse_control)
-```
-
-#### PCSS Cognitive Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_cognitive_symptom_score, impulse_control)
-```
-
-
-### Reaction Time {.tabset .tabset-fade .tabset-pills}
-
-Higher Reaction Time scores indicate poorer performance. 
-
-#### PCSS Total Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_symptom_score, reaction_time)
-```
-
-#### PCSS Somatic Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_somatic_symptom_score, reaction_time)
-```
-
-#### PCSS Psychological Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_psychological_symptom_score, reaction_time)
-```
-
-#### PCSS Cognitive Symptom Score Comparison
-
-```{r, include=TRUE}
-symptom_scatter(impact_post_injury_1, total_cognitive_symptom_score, reaction_time)
-```
-
-## Post-Injury 1 ImPACT and PCSS Descriptive Statistics {.tabset .tabset-fade .tabset-pills}
+### Age 
 
 ```{r, include=FALSE}
-create_react_score <- function(df, var) {
-    df %>% 
-      summarize(Mean = mean({{var}}),
-                SD = sd({{var}}),
-                Min = min({{var}}),
-                Max = max({{var}}),
-                Total = length({{var}})) %>% 
-      mutate_if(is.numeric, round, 2) %>% 
-      reactable(columns = list(
-        Mean = colDef(format = colFormat(separators = TRUE)),
-        SD = colDef(format = colFormat(separators = TRUE)),
-        Min = colDef(format = colFormat(separators = TRUE)),
-        Max = colDef(format = colFormat(separators = TRUE)),
-        Total = colDef(format = colFormat(separators = TRUE, suffix = " concussions"))
-      ))
-}
+concussion_age_total_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(age) %>% 
+  summarize(total = n()) %>% 
+  reactable(
+    columns = list(
+      age = colDef(name = "Age"),
+      total = colDef(name = "Total")),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
+```
 
-score_hist <- function(df, x) {
-  ggplot(df, aes({{x}})) +
+```{r, include=TRUE}
+concussion_age_total_tbl
+```
+
+### League
+
+```{r, include=FALSE}
+league_total_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(league) %>% 
+  summarize(total = n()) %>% 
+  reactable(
+    columns = list(
+      league = colDef(name = "League"),
+      total = colDef(name = "Total")),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
+```
+
+```{r, include=TRUE}
+league_total_tbl
+```
+
+### School 
+
+```{r, include=FALSE}
+school_total_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(league, school) %>% 
+  summarize(total = n()) %>% 
+  arrange(desc(total)) %>% 
+  reactable(
+    columns = list(
+      league = colDef(name = "League"),
+      school = colDef(name = "School"),
+      total = colDef(name = "Total")),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
+```
+
+```{r, include=TRUE}
+school_total_tbl
+```
+
+### Sport 
+
+```{r, include=FALSE}
+sport_total_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(sport) %>% 
+  summarize(total = n()) %>% 
+  arrange(desc(total)) %>% 
+  reactable(
+    columns = list(
+      sport = colDef(name = "Sport"),
+      total = colDef(name = "Total")),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
+```
+
+```{r, include=TRUE}
+sport_total_tbl
+```
+
+### Sport Level 
+
+```{r, include=FALSE}
+level_total_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(level) %>% 
+  summarize(total = n()) %>% 
+  reactable(
+    columns = list(
+      level = colDef(name = "Level"),
+      total = colDef(name = "Total")),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
+```
+
+```{r, include=TRUE}
+level_total_tbl
+```
+
+## Data Exploration - SIMS RTP Information 
+
+```{r, include=FALSE}
+head(final_rtl_rtp_data_3)
+
+ggplot(final_rtl_rtp_data_3, aes(onset_rtl_total_days)) +
   geom_histogram(fill = "#56B4E9",
                 color = "white", 
                 alpha = 0.9,
-                bins = 25) +
-  labs(x = "Score",
-       y = "Number of Concussions")
-}
+                bins = 10) +
+  labs(x = "Number of Days",
+       y = "Number of Individuals",
+       title = "Number of Days from Injury Onset to RTP Completion")
+
+
+age_onset_rtp_time <- final_rtl_rtp_data_3 %>% 
+  group_by(age) %>% 
+  nest() %>% 
+  mutate(plots = pmap(list(age, data), 
+  ~ggplot(..2, aes(onset_rtp_total_days)) +
+  geom_histogram(fill = "#56B4E9",
+                color = "white", 
+                alpha = 0.9,
+                bins = 15) +
+  facet_wrap(~gender, ncol = 1) +
+  theme(plot.title = element_text(hjust = 0.5)) +  
+  labs(x = "Number of Days",
+       y = "Number of Individuals", 
+       title = glue("Number of Days From Injury Onset to RTP Completion\n by Age {.x}"))))
+
+age_onset_rtp_time$plots[[1]] #age 18
+age_onset_rtp_time$plots[[2]] #age 15
+age_onset_rtp_time$plots[[3]] #age 14
+age_onset_rtp_time$plots[[4]] #age 17
+age_onset_rtp_time$plots[[5]] #age 16
+age_onset_rtp_time$plots[[6]] #one individual for this one so not really needed 
+
+age_onset_rtl_time <- final_rtl_rtp_data_3 %>% 
+  group_by(age) %>% 
+  nest() %>% 
+  mutate(plots = pmap(list(age, data), 
+  ~ggplot(..2, aes(onset_rtl_total_days)) +
+  geom_histogram(fill = "#56B4E9",
+                color = "white", 
+                alpha = 0.9,
+                bins = 15) +
+  facet_wrap(~gender, ncol = 1) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Number of Days",
+       y = "Number of Individuals", 
+       title = glue("Number of Days From Injury Onset to RTL Completion\n by Age {.x}"))))
+
+age_onset_rtl_time$plots[[1]] #age 18
+age_onset_rtl_time$plots[[2]] #age 15
+age_onset_rtl_time$plots[[3]] #age 14
+age_onset_rtl_time$plots[[4]] #age 17
+age_onset_rtl_time$plots[[5]] #age 16
+age_onset_rtl_time$plots[[6]] #one individual for this one so not really needed 
+
+age_rtl_rtp_time <- final_rtl_rtp_data_3 %>% 
+  group_by(age) %>% 
+  nest() %>% 
+  mutate(plots = pmap(list(age, data), 
+  ~ggplot(..2, aes(rtl_rtp_total_days)) +
+  geom_histogram(fill = "#56B4E9",
+                color = "white", 
+                alpha = 0.9,
+                bins = 15) +
+  facet_wrap(~gender, ncol = 1) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Number of Days",
+       y = "Number of Individuals", 
+       title = glue("Number of Days from RTL Completion to RTP Completion\n by Age {.x}"))))
+
+age_rtl_rtp_time$plots[[1]] #age 18
+age_rtl_rtp_time$plots[[2]] #age 15
+age_rtl_rtp_time$plots[[3]] #age 14
+age_rtl_rtp_time$plots[[4]] #age 17
+age_rtl_rtp_time$plots[[5]] #age 16
+age_rtl_rtp_time$plots[[6]] #one individual for this one so not really needed 
+
+
+league_onset_rtp_time <- final_rtl_rtp_data_3 %>% 
+  group_by(league) %>% 
+  nest() %>% 
+  mutate(plots = pmap(list(league, data), 
+  ~ggplot(..2, aes(onset_rtp_total_days, gender)) +
+  ggridges::geom_density_ridges(color = "white",
+                                fill = "#A9E5C5") +
+  theme(plot.title = element_text(hjust = 0.5)) +  
+  labs(x = "Number of Days", 
+       y = "",
+       title = glue("Number of Days from Injury Onset\n to RTP Completion: {.x}"))))
+
+league_onset_rtp_time$plots[[1]] #BIIF
+league_onset_rtp_time$plots[[2]] #KIF
+league_onset_rtp_time$plots[[3]] #MIL
+
+league_onset_rtl_time <- final_rtl_rtp_data_3 %>% 
+  group_by(league) %>% 
+  nest() %>% 
+  mutate(plots = pmap(list(league, data), 
+  ~ggplot(..2, aes(onset_rtl_total_days, gender)) +
+  ggridges::geom_density_ridges(color = "white",
+                                fill = "#A9E5C5") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Number of Days", 
+       y = "",
+       title = glue("Number of Days from Injury Onset\n to RTL Completion: {.x}"))))
+
+league_onset_rtl_time$plots[[1]] #BIIF
+league_onset_rtl_time$plots[[2]] #KIF
+league_onset_rtl_time$plots[[3]] #MIL
+
+league_rtl_rtp_time <- final_rtl_rtp_data_3 %>% 
+  group_by(league) %>% 
+  nest() %>% 
+  mutate(plots = pmap(list(league, data), 
+  ~ggplot(..2, aes(rtl_rtp_total_days, gender)) +
+  ggridges::geom_density_ridges(color = "white",
+                                fill = "#A9E5C5") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Number of Days", 
+       y = "",
+       title = glue("Number of Days from RTL Completion\n to RTP Completion: {.x}"))))
+
+league_rtl_rtp_time$plots[[1]] #BIIF
+league_rtl_rtp_time$plots[[2]] #KIF
+league_rtl_rtp_time$plots[[3]] #MIL
+
 ```
 
-### ImPACT {.tabset .tabset-fade .tabset-pills}
+### Duration of Time from Onset to RTP Completion {.tabset .tabset-fade .tabset-pills}
 
-#### Verbal Memory Summary
+#### Quick Summary
 
 ```{r, include=TRUE}
-create_react_score(impact_post_injury_1, verbal_memory)
+create_react_time(final_rtl_rtp_data_3, onset_rtp_total_days)
 ```
 
-#### Verbal Memory Distribution
+#### Gender Summary 
 
-```{r, include=TRUE}
-score_hist(impact_post_injury_1, verbal_memory)
+```{r, include=FALSE}
+gender_onset_rtp_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(gender) %>% 
+  summarize(mean = mean(onset_rtp_total_days),
+            sd = sd(onset_rtp_total_days),
+            min = min(onset_rtp_total_days),
+            max = max(onset_rtp_total_days),
+            total = length(onset_rtp_total_days)) %>%
+  mutate(mean = as.numeric(mean),
+         sd = as.numeric(sd),
+         min = as.numeric(min),
+         max = as.numeric(max),
+         total = as.numeric(total)) %>% 
+  reactable(
+    columns = list(
+      gender = colDef(name = "Gender"),
+      mean = colDef(name = "Mean",
+                    format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      sd = colDef(name = "SD",
+                  format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      min = colDef(name = "Min",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      max = colDef(name = "Max",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      total = colDef(name = "Total",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " concussions"))),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
 ```
 
-#### Visual Memory Summary
-
 ```{r, include=TRUE}
-create_react_score(impact_post_injury_1, visual_memory)
+gender_onset_rtp_tbl
 ```
 
-#### Visual Memory Distribution
+#### Age Summary
 
-```{r, include=TRUE}
-score_hist(impact_post_injury_1, visual_memory)
+```{r, include=FALSE}
+age_onset_rtp_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(age) %>% 
+  summarize(mean = mean(onset_rtp_total_days),
+            sd = sd(onset_rtp_total_days),
+            min = min(onset_rtp_total_days),
+            max = max(onset_rtp_total_days),
+            total = length(onset_rtp_total_days)) %>%
+  mutate(mean = as.numeric(mean),
+         sd = as.numeric(sd),
+         min = as.numeric(min),
+         max = as.numeric(max),
+         total = as.numeric(total)) %>% 
+  reactable(
+    columns = list(
+      age = colDef(name = "Age"),
+      mean = colDef(name = "Mean",
+                    format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      sd = colDef(name = "SD",
+                  format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      min = colDef(name = "Min",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      max = colDef(name = "Max",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      total = colDef(name = "Total",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " concussions"))),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
 ```
 
-#### Visual Motor Summary
-
 ```{r, include=TRUE}
-create_react_score(impact_post_injury_1, visual_motor)
+age_onset_rtp_tbl
 ```
 
-#### Visual Motor Distribution
+#### League Summary
 
-```{r, include=TRUE}
-score_hist(impact_post_injury_1, visual_motor)
+```{r, include=FALSE}
+league_onset_rtp_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(league) %>% 
+  summarize(mean = mean(onset_rtp_total_days),
+            sd = sd(onset_rtp_total_days),
+            min = min(onset_rtp_total_days),
+            max = max(onset_rtp_total_days),
+            total = length(onset_rtp_total_days)) %>%
+  mutate(mean = as.numeric(mean),
+         sd = as.numeric(sd),
+         min = as.numeric(min),
+         max = as.numeric(max),
+         total = as.numeric(total)) %>% 
+  reactable(
+    columns = list(
+      league = colDef(name = "League"),
+      mean = colDef(name = "Mean",
+                    format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      sd = colDef(name = "SD",
+                  format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      min = colDef(name = "Min",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      max = colDef(name = "Max",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      total = colDef(name = "Total",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " concussions"))),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
 ```
 
-
-#### Impulse Control Summary
-
 ```{r, include=TRUE}
-create_react_score(impact_post_injury_1, impulse_control)
+league_onset_rtp_tbl
 ```
 
-#### Impulse Control Distribution
+#### Visualizations 
+
+##### Age and Gender {.tabset .tabset-fade .tabset-pills}
+
+###### Age 14
 
 ```{r, include=TRUE}
-score_hist(impact_post_injury_1, impulse_control)
+age_onset_rtp_time$plots[[3]]
 ```
 
-#### Reaction Time Summary
+###### Age 15
 
 ```{r, include=TRUE}
-create_react_score(impact_post_injury_1, reaction_time)
+age_onset_rtp_time$plots[[2]]
 ```
 
-#### Reaction Time Distribution
+###### Age 16
 
 ```{r, include=TRUE}
-score_hist(impact_post_injury_1, reaction_time)
+age_onset_rtp_time$plots[[5]]
 ```
 
-
-### PCSS {.tabset .tabset-fade .tabset-pills}
-
-* Total Symptom Score: 22 items (Total possible score of 132)
-* Total Somatic Symptom Score: 13 items (Total possible score 78)
-* Total Psychological Symptom Score: 5 items (Total possible score of 30)
-* Total Cognitive Symptom Score: 4 items (Total possible score of 24)
-
-#### Total Symptom Score
+###### Age 17
 
 ```{r, include=TRUE}
-create_react_score(impact_post_injury_1, total_symptom_score)
+age_onset_rtp_time$plots[[4]]
 ```
 
-#### Total Symptom Distribution 
+###### Age 18
 
 ```{r, include=TRUE}
-score_hist(impact_post_injury_1, total_symptom_score)
+age_onset_rtp_time$plots[[1]]
 ```
 
-#### Somatic Symptom Score
+##### League and Gender {.tabset .tabset-fade .tabset-pills}
+
+###### BIIF
 
 ```{r, include=TRUE}
-create_react_score(impact_post_injury_1, total_somatic_symptom_score)
+league_onset_rtp_time$plots[[1]] 
 ```
 
-#### Somatic Symptom Distribution 
+###### KIF
 
 ```{r, include=TRUE}
-score_hist(impact_post_injury_1, total_somatic_symptom_score)
+league_onset_rtp_time$plots[[2]] 
 ```
 
-#### Psychological Symptom Score
+###### MIL
 
 ```{r, include=TRUE}
-create_react_score(impact_post_injury_1, total_psychological_symptom_score)
-```
-
-#### Psychological Symptom Distribution 
-
-```{r, include=TRUE}
-score_hist(impact_post_injury_1, total_psychological_symptom_score)
-```
-
-#### Cognitive Symptom Score
-
-```{r, include=TRUE}
-create_react_score(impact_post_injury_1, total_cognitive_symptom_score)
-```
-
-#### Cognitive Symptom Distribution 
-
-```{r, include=TRUE}
-score_hist(impact_post_injury_1, total_cognitive_symptom_score)
+league_onset_rtp_time$plots[[3]] 
 ```
