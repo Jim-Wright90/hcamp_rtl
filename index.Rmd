@@ -719,6 +719,7 @@ gender_onset_rtp_tbl <- final_rtl_rtp_data_3 %>%
     highlight = TRUE,
     bordered = TRUE
   )
+
 ```
 
 ```{r, include=TRUE}
@@ -860,3 +861,428 @@ league_onset_rtp_time$plots[[2]]
 ```{r, include=TRUE}
 league_onset_rtp_time$plots[[3]] 
 ```
+
+### Duration of Time from Onset to RTL Completion {.tabset .tabset-fade .tabset-pills}
+
+#### Quick Summary
+
+```{r, include=TRUE}
+create_react_time(final_rtl_rtp_data_3, onset_rtl_total_days)
+```
+
+#### Gender Summary 
+
+```{r, include=FALSE}
+gender_onset_rtl_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(gender) %>% 
+  summarize(mean = mean(onset_rtl_total_days),
+            sd = sd(onset_rtl_total_days),
+            min = min(onset_rtl_total_days),
+            max = max(onset_rtl_total_days),
+            total = length(onset_rtl_total_days)) %>%
+  mutate(mean = as.numeric(mean),
+         sd = as.numeric(sd),
+         min = as.numeric(min),
+         max = as.numeric(max),
+         total = as.numeric(total)) %>% 
+  reactable(
+    columns = list(
+      gender = colDef(name = "Gender"),
+      mean = colDef(name = "Mean",
+                    format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      sd = colDef(name = "SD",
+                  format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      min = colDef(name = "Min",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      max = colDef(name = "Max",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      total = colDef(name = "Total",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " concussions"))),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
+
+```
+
+```{r, include=TRUE}
+gender_onset_rtl_tbl
+```
+
+#### Age Summary
+
+```{r, include=FALSE}
+age_onset_rtl_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(age) %>% 
+  summarize(mean = mean(onset_rtl_total_days),
+            sd = sd(onset_rtl_total_days),
+            min = min(onset_rtl_total_days),
+            max = max(onset_rtl_total_days),
+            total = length(onset_rtl_total_days)) %>%
+  mutate(mean = as.numeric(mean),
+         sd = as.numeric(sd),
+         min = as.numeric(min),
+         max = as.numeric(max),
+         total = as.numeric(total)) %>% 
+  reactable(
+    columns = list(
+      age = colDef(name = "Age"),
+      mean = colDef(name = "Mean",
+                    format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      sd = colDef(name = "SD",
+                  format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      min = colDef(name = "Min",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      max = colDef(name = "Max",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      total = colDef(name = "Total",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " concussions"))),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
+```
+
+```{r, include=TRUE}
+age_onset_rtl_tbl
+```
+
+#### League Summary
+
+```{r, include=FALSE}
+league_onset_rtl_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(league) %>% 
+  summarize(mean = mean(onset_rtl_total_days),
+            sd = sd(onset_rtl_total_days),
+            min = min(onset_rtl_total_days),
+            max = max(onset_rtl_total_days),
+            total = length(onset_rtl_total_days)) %>%
+  mutate(mean = as.numeric(mean),
+         sd = as.numeric(sd),
+         min = as.numeric(min),
+         max = as.numeric(max),
+         total = as.numeric(total)) %>% 
+  reactable(
+    columns = list(
+      league = colDef(name = "League"),
+      mean = colDef(name = "Mean",
+                    format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      sd = colDef(name = "SD",
+                  format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      min = colDef(name = "Min",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      max = colDef(name = "Max",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      total = colDef(name = "Total",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " concussions"))),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
+```
+
+```{r, include=TRUE}
+league_onset_rtl_tbl
+```
+
+#### Visualizations 
+
+##### Age and Gender {.tabset .tabset-fade .tabset-pills}
+
+###### Age 14
+
+```{r, include=TRUE}
+age_onset_rtl_time$plots[[3]]
+```
+
+###### Age 15
+
+```{r, include=TRUE}
+age_onset_rtl_time$plots[[2]]
+```
+
+###### Age 16
+
+```{r, include=TRUE}
+age_onset_rtl_time$plots[[5]]
+```
+
+###### Age 17
+
+```{r, include=TRUE}
+age_onset_rtl_time$plots[[4]]
+```
+
+###### Age 18
+
+```{r, include=TRUE}
+age_onset_rtl_time$plots[[1]]
+```
+
+##### League and Gender {.tabset .tabset-fade .tabset-pills}
+
+###### BIIF
+
+```{r, include=TRUE}
+league_onset_rtl_time$plots[[1]] 
+```
+
+###### KIF
+
+```{r, include=TRUE}
+league_onset_rtl_time$plots[[2]] 
+```
+
+###### MIL
+
+```{r, include=TRUE}
+league_onset_rtl_time$plots[[3]] 
+```
+
+
+### Duration of Time from RTL Completion to RTP Completion {.tabset .tabset-fade .tabset-pills}
+
+#### Quick Summary
+
+```{r, include=TRUE}
+create_react_time(final_rtl_rtp_data_3, rtl_rtp_total_days)
+```
+
+#### Gender Summary 
+
+```{r, include=FALSE}
+gender_rtl_rtp_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(gender) %>% 
+  summarize(mean = mean(rtl_rtp_total_days),
+            sd = sd(rtl_rtp_total_days),
+            min = min(rtl_rtp_total_days),
+            max = max(rtl_rtp_total_days),
+            total = length(rtl_rtp_total_days)) %>%
+  mutate(mean = as.numeric(mean),
+         sd = as.numeric(sd),
+         min = as.numeric(min),
+         max = as.numeric(max),
+         total = as.numeric(total)) %>% 
+  reactable(
+    columns = list(
+      gender = colDef(name = "Gender"),
+      mean = colDef(name = "Mean",
+                    format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      sd = colDef(name = "SD",
+                  format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      min = colDef(name = "Min",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      max = colDef(name = "Max",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      total = colDef(name = "Total",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " concussions"))),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
+
+```
+
+```{r, include=TRUE}
+gender_rtl_rtp_tbl
+```
+
+#### Age Summary
+
+```{r, include=FALSE}
+age_rtl_rtp_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(age) %>% 
+  summarize(mean = mean(rtl_rtp_total_days),
+            sd = sd(rtl_rtp_total_days),
+            min = min(rtl_rtp_total_days),
+            max = max(rtl_rtp_total_days),
+            total = length(rtl_rtp_total_days)) %>%
+  mutate(mean = as.numeric(mean),
+         sd = as.numeric(sd),
+         min = as.numeric(min),
+         max = as.numeric(max),
+         total = as.numeric(total)) %>% 
+  reactable(
+    columns = list(
+      age = colDef(name = "Age"),
+      mean = colDef(name = "Mean",
+                    format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      sd = colDef(name = "SD",
+                  format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      min = colDef(name = "Min",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      max = colDef(name = "Max",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      total = colDef(name = "Total",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " concussions"))),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
+```
+
+```{r, include=TRUE}
+age_rtl_rtp_tbl
+```
+
+#### League Summary
+
+```{r, include=FALSE}
+league_rtl_rtp_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(league) %>% 
+  summarize(mean = mean(rtl_rtp_total_days),
+            sd = sd(rtl_rtp_total_days),
+            min = min(rtl_rtp_total_days),
+            max = max(rtl_rtp_total_days),
+            total = length(rtl_rtp_total_days)) %>%
+  mutate(mean = as.numeric(mean),
+         sd = as.numeric(sd),
+         min = as.numeric(min),
+         max = as.numeric(max),
+         total = as.numeric(total)) %>% 
+  reactable(
+    columns = list(
+      league = colDef(name = "League"),
+      mean = colDef(name = "Mean",
+                    format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      sd = colDef(name = "SD",
+                  format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      min = colDef(name = "Min",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      max = colDef(name = "Max",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      total = colDef(name = "Total",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " concussions"))),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
+```
+
+```{r, include=TRUE}
+league_rtl_rtp_tbl
+```
+
+#### Visualizations 
+
+##### Age and Gender {.tabset .tabset-fade .tabset-pills}
+
+###### Age 14
+
+```{r, include=TRUE}
+age_rtl_rtp_time$plots[[3]]
+```
+
+###### Age 15
+
+```{r, include=TRUE}
+age_rtl_rtp_time$plots[[2]]
+```
+
+###### Age 16
+
+```{r, include=TRUE}
+age_rtl_rtp_time$plots[[5]]
+```
+
+###### Age 17
+
+```{r, include=TRUE}
+age_rtl_rtp_time$plots[[4]]
+```
+
+###### Age 18
+
+```{r, include=TRUE}
+age_rtl_rtp_time$plots[[1]]
+```
+
+##### League and Gender {.tabset .tabset-fade .tabset-pills}
+
+###### BIIF
+
+```{r, include=TRUE}
+league_rtl_rtp_time$plots[[1]] 
+```
+
+###### KIF
+
+```{r, include=TRUE}
+league_rtl_rtp_time$plots[[2]] 
+```
+
+###### MIL
+
+```{r, include=TRUE}
+league_rtl_rtp_time$plots[[3]] 
+```
+
+
+
+## Data Exploration - ImPACT PCSS Scores 
+
+### Time between Injury Onset and Test Date
+
+To calculate the duration of time from injury onset (`onset`) and ImPACT test date where PCSS scores were collected (`test_date`), a variable was created (`days_between_injury_test_date`) to represent this duration of time. Injuries where testing occurred more than 30 days after the injury were removed from the data set. 
+
+```{r, include=TRUE}
+create_react_time(final_rtl_rtp_data_3, days_between_injury_test_date)
+```
+
+
+### PCSS Symptom Category Description 
+
+Using Lumba-Brown et al. (2019) and Harmon et al. (2019) as references, the 22 PCSS symptoms were organized into the following six symptom clusters: 
+
+1. Headache-Migraine Symptoms Cluster (Total Possible Score: 18)
+  + Headache (PCSS symptom 1)
+  + Light Sensitivity (PCSS symptom 11)
+  + Noise Sensitivity (PCSS symptom 12)
+2. Cognitive Symptoms Cluster (Total Possible Score: 24)
+  + Difficulty Concentrating (PCSS symptom 20)
+  + Difficulty Remembering (PCSS symptom 21)
+  + Feeling "Slow" (PCSS symptom 18)
+  + Feeling "Foggy" (PCSS symptom 19)
+3. Anxiety-Mood Symptoms Cluster (Total Possible Score: 30)
+  + Irritability (PCSS symptom 13)
+  + Sadness (PCSS symptom 14)
+  + Nervousness (PCSS symptom 15)
+  + More Emotional (PCSS symptom 16)
+  + Numbness (PCSS symptom 17)
+4. Ocular-Motor Symptoms Cluster (Total Possible Score: 6)
+  + Visual Problems (PCSS symptom 22)
+5. Vestibular Symptoms Cluster (Total Possible Score: 24)
+  + Dizziness (PCSS symptom 5)
+  + Balance Problems (PCSS symptom 4)
+  + Nausea (PCSS symptom 2)
+  + Vomiting (PCSS symptom 3)
+6. Sleep Symptoms Cluster (Total Possible Score: 30) 
+  + Fatigue (PCSS symptom 6)
+  + Trouble Falling Asleep (PCSS symptom 7)
+  + Excessive Sleep (PCSS symptom 8)
+  + Loss of Sleep (PCSS symptom 9)
+  + Drowsiness (PCSS symptom 10)
+
+
+PCSS Total Possible Score: 132
+
+
+
