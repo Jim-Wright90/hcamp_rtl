@@ -554,10 +554,23 @@ ggplot(final_rtl_rtp_data_3, aes(onset_rtl_total_days)) +
                 color = "white", 
                 alpha = 0.9,
                 bins = 10) +
+  facet_wrap(~gender, ncol = 1) +
   labs(x = "Number of Days",
-       y = "Number of Individuals",
-       title = "Number of Days from Injury Onset to RTP Completion")
+       y = "Number of Individuals")
 
+time_hist <- function(df, x) {
+  ggplot(df, aes({{x}})) +
+  geom_histogram(fill = "#56B4E9",
+                color = "white", 
+                alpha = 0.9,
+                bins = 10) +
+  facet_wrap(~gender, ncol = 1) +
+  theme(plot.title = element_text(hjust = 0.5)) +  
+  labs(x = "Number of Days",
+       y = "Number of Individuals")
+}
+
+time_hist(final_rtl_rtp_data_3, onset_rtl_total_days)
 
 age_onset_rtp_time <- final_rtl_rtp_data_3 %>% 
   group_by(age) %>% 
@@ -572,7 +585,7 @@ age_onset_rtp_time <- final_rtl_rtp_data_3 %>%
   theme(plot.title = element_text(hjust = 0.5)) +  
   labs(x = "Number of Days",
        y = "Number of Individuals", 
-       title = glue("Number of Days From Injury Onset to RTP Completion\n by Age {.x}"))))
+       title = glue("Number of Days From Injury Onset to RTP Completion:\n Age {.x}"))))
 
 age_onset_rtp_time$plots[[1]] #age 18
 age_onset_rtp_time$plots[[2]] #age 15
@@ -594,7 +607,7 @@ age_onset_rtl_time <- final_rtl_rtp_data_3 %>%
   theme(plot.title = element_text(hjust = 0.5)) +
   labs(x = "Number of Days",
        y = "Number of Individuals", 
-       title = glue("Number of Days From Injury Onset to RTL Completion\n by Age {.x}"))))
+       title = glue("Number of Days From Injury Onset to RTL Completion:\n Age {.x}"))))
 
 age_onset_rtl_time$plots[[1]] #age 18
 age_onset_rtl_time$plots[[2]] #age 15
@@ -616,7 +629,7 @@ age_rtl_rtp_time <- final_rtl_rtp_data_3 %>%
   theme(plot.title = element_text(hjust = 0.5)) +
   labs(x = "Number of Days",
        y = "Number of Individuals", 
-       title = glue("Number of Days from RTL Completion to RTP Completion\n by Age {.x}"))))
+       title = glue("Number of Days from RTL Completion to RTP Completion:\n Age {.x}"))))
 
 age_rtl_rtp_time$plots[[1]] #age 18
 age_rtl_rtp_time$plots[[2]] #age 15
@@ -625,6 +638,25 @@ age_rtl_rtp_time$plots[[4]] #age 17
 age_rtl_rtp_time$plots[[5]] #age 16
 age_rtl_rtp_time$plots[[6]] #one individual for this one so not really needed 
 
+
+ggplot(final_rtl_rtp_data_3, aes(onset_rtp_total_days, gender)) +
+  ggridges::geom_density_ridges(color = "white",
+                                fill = "#A9E5C5") +
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  labs(x = "Number of Days",
+       y = "")
+  
+all_leagues_plot <- function(df, x, y) {
+  ggplot(df, aes({{x}}, {{y}})) +
+  ggridges::geom_density_ridges(color = "white",
+                                fill = "#A9E5C5") +
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  labs(x = "Number of Days",
+       y = "")
+}
+
+all_leagues_plot(final_rtl_rtp_data_3, onset_rtp_total_days, gender) +
+  labs(title = "Number of Days from Injury Onset\n to RTP Completion")
 
 league_onset_rtp_time <- final_rtl_rtp_data_3 %>% 
   group_by(league) %>% 
@@ -812,53 +844,67 @@ league_onset_rtp_tbl
 
 ##### Age and Gender {.tabset .tabset-fade .tabset-pills}
 
+###### All Ages 
+
+```{r, include=TRUE, fig.height=6}
+time_hist(final_rtl_rtp_data_3, onset_rtp_total_days) +
+  labs(title = "Number of Days From Injury Onset to RTP Completion")
+```
+
 ###### Age 14
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_onset_rtp_time$plots[[3]]
 ```
 
 ###### Age 15
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_onset_rtp_time$plots[[2]]
 ```
 
 ###### Age 16
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_onset_rtp_time$plots[[5]]
 ```
 
 ###### Age 17
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_onset_rtp_time$plots[[4]]
 ```
 
 ###### Age 18
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_onset_rtp_time$plots[[1]]
 ```
 
 ##### League and Gender {.tabset .tabset-fade .tabset-pills}
 
+###### All Leagues
+
+```{r, include=TRUE, fig.height=6}
+all_leagues_plot(final_rtl_rtp_data_3, onset_rtp_total_days, gender) +
+  labs(title = "Number of Days from Injury Onset\n to RTP Completion")
+```
+
 ###### BIIF
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 league_onset_rtp_time$plots[[1]] 
 ```
 
 ###### KIF
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 league_onset_rtp_time$plots[[2]] 
 ```
 
 ###### MIL
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 league_onset_rtp_time$plots[[3]] 
 ```
 
@@ -998,53 +1044,67 @@ league_onset_rtl_tbl
 
 ##### Age and Gender {.tabset .tabset-fade .tabset-pills}
 
+###### All Ages
+
+```{r, include=TRUE, fig.height=6}
+time_hist(final_rtl_rtp_data_3, onset_rtl_total_days) +
+  labs(title = "Number of Days from Injury Onset to RTL Completion")
+```
+
 ###### Age 14
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_onset_rtl_time$plots[[3]]
 ```
 
 ###### Age 15
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_onset_rtl_time$plots[[2]]
 ```
 
 ###### Age 16
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_onset_rtl_time$plots[[5]]
 ```
 
 ###### Age 17
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_onset_rtl_time$plots[[4]]
 ```
 
 ###### Age 18
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_onset_rtl_time$plots[[1]]
 ```
 
 ##### League and Gender {.tabset .tabset-fade .tabset-pills}
 
+###### All Leagues 
+
+```{r, include=TRUE, fig.height=6}
+all_leagues_plot(final_rtl_rtp_data_3, onset_rtl_total_days, gender) +
+  labs(title = "Number of Days from Injury Onset\n to RTL Completion")
+```
+
 ###### BIIF
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 league_onset_rtl_time$plots[[1]] 
 ```
 
 ###### KIF
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 league_onset_rtl_time$plots[[2]] 
 ```
 
 ###### MIL
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 league_onset_rtl_time$plots[[3]] 
 ```
 
@@ -1185,53 +1245,67 @@ league_rtl_rtp_tbl
 
 ##### Age and Gender {.tabset .tabset-fade .tabset-pills}
 
+###### All Ages
+
+```{r, include=TRUE, fig.height=6}
+time_hist(final_rtl_rtp_data_3, rtl_rtp_total_days) +
+  labs(title = "Number of Days from RTL Completion to RTP Completion")
+```
+
 ###### Age 14
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_rtl_rtp_time$plots[[3]]
 ```
 
 ###### Age 15
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_rtl_rtp_time$plots[[2]]
 ```
 
 ###### Age 16
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_rtl_rtp_time$plots[[5]]
 ```
 
 ###### Age 17
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_rtl_rtp_time$plots[[4]]
 ```
 
 ###### Age 18
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 age_rtl_rtp_time$plots[[1]]
 ```
 
 ##### League and Gender {.tabset .tabset-fade .tabset-pills}
 
+###### All Leagues 
+
+```{r, include=TRUE, fig.height=6}
+all_leagues_plot(final_rtl_rtp_data_3, rtl_rtp_total_days, gender) +
+  labs(title = "Number of Days from RTL Completion\n to RTP Completion")
+```
+
 ###### BIIF
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 league_rtl_rtp_time$plots[[1]] 
 ```
 
 ###### KIF
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 league_rtl_rtp_time$plots[[2]] 
 ```
 
 ###### MIL
 
-```{r, include=TRUE}
+```{r, include=TRUE, fig.height=6}
 league_rtl_rtp_time$plots[[3]] 
 ```
 
@@ -1239,14 +1313,56 @@ league_rtl_rtp_time$plots[[3]]
 
 ## Data Exploration - ImPACT PCSS Scores 
 
-### Time between Injury Onset and Test Date
+### Time between Injury Onset and Test Date {.tabset .tabset-fade .tabset-pills}
 
 To calculate the duration of time from injury onset (`onset`) and ImPACT test date where PCSS scores were collected (`test_date`), a variable was created (`days_between_injury_test_date`) to represent this duration of time. Injuries where testing occurred more than 30 days after the injury were removed from the data set. 
+
+#### Whole Sample 
 
 ```{r, include=TRUE}
 create_react_time(final_rtl_rtp_data_3, days_between_injury_test_date)
 ```
 
+#### League
+
+```{r, include=FALSE}
+league_time_between_injury_test_tbl <- final_rtl_rtp_data_3 %>% 
+  group_by(league) %>% 
+  summarize(mean = mean(days_between_injury_test_date),
+            sd = sd(days_between_injury_test_date),
+            min = min(days_between_injury_test_date),
+            max = max(days_between_injury_test_date),
+            total = length(days_between_injury_test_date)) %>%
+  mutate(mean = as.numeric(mean),
+         sd = as.numeric(sd),
+         min = as.numeric(min),
+         max = as.numeric(max),
+         total = as.numeric(total)) %>% 
+  reactable(
+    columns = list(
+      league = colDef(name = "League"),
+      mean = colDef(name = "Mean",
+                    format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      sd = colDef(name = "SD",
+                  format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      min = colDef(name = "Min",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      max = colDef(name = "Max",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " days")),
+      total = colDef(name = "Total",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " concussions"))),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
+```
+
+```{r, include=TRUE}
+league_time_between_injury_test_tbl
+```
 
 ### PCSS Symptom Category Description 
 
@@ -1284,5 +1400,701 @@ Using Lumba-Brown et al. (2019) and Harmon et al. (2019) as references, the 22 P
 
 PCSS Total Possible Score: 132
 
+### PCSS Score Summaries 
+
+#### Total Score (Total Possible Score: 132) {.tabset .tabset-fade .tabset-pills}
+
+```{r, include=FALSE}
+create_react(final_rtl_rtp_data_3, total_symptom_score)
+
+gender_pcss_tbl <- function(df, x, y) {
+  df %>% 
+  group_by({{x}}) %>% 
+  summarize(mean = mean({{y}}),
+            sd = sd({{y}}),
+            min = min({{y}}),
+            max = max({{y}}),
+            total = length({{y}})) %>%
+  mutate(mean = as.numeric(mean),
+         sd = as.numeric(sd),
+         min = as.numeric(min),
+         max = as.numeric(max),
+         total = as.numeric(total)) %>% 
+  reactable(
+    columns = list(
+      gender = colDef(name = "Gender"),
+      mean = colDef(name = "Mean",
+                    format = colFormat(digits = 2, separators = TRUE)),
+      sd = colDef(name = "SD",
+                  format = colFormat(digits = 2, separators = TRUE)),
+      min = colDef(name = "Min",
+                   format = colFormat(digits = 2, separators = TRUE)),
+      max = colDef(name = "Max",
+                   format = colFormat(digits = 2, separators = TRUE)),
+      total = colDef(name = "Total",
+                   format = colFormat(digits = 2, separators = TRUE, suffix = " concussions"))),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
+}
+
+gender_pcss_tbl(final_rtl_rtp_data_3, gender, total_symptom_score)
+
+age_pcss_tbl <- function(df, x, y) {
+  df %>% 
+  group_by({{x}}) %>% 
+  summarize(mean = mean({{y}}),
+            sd = sd({{y}}),
+            min = min({{y}}),
+            max = max({{y}}),
+            total = length({{y}})) %>%
+  mutate(mean = as.numeric(mean),
+         sd = as.numeric(sd),
+         min = as.numeric(min),
+         max = as.numeric(max),
+         total = as.numeric(total)) %>% 
+  reactable(
+    columns = list(
+      age = colDef(name = "Age"),
+      mean = colDef(name = "Mean",
+                    format = colFormat(digits = 2, separators = TRUE)),
+      sd = colDef(name = "SD",
+                  format = colFormat(digits = 2, separators = TRUE)),
+      min = colDef(name = "Min",
+                   format = colFormat(digits = 2, separators = TRUE)),
+      max = colDef(name = "Max",
+                   format = colFormat(digits = 2, separators = TRUE)),
+      total = colDef(name = "Total",
+                   format = colFormat(digits = 2, separators = TRUE))),
+    pagination = TRUE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE
+  )
+}
+
+age_pcss_tbl(final_rtl_rtp_data_3, age, total_symptom_score)
 
 
+```
+
+##### Summary 
+
+```{r, include=TRUE}
+create_react(final_rtl_rtp_data_3, total_symptom_score)
+```
+
+##### Gender Summary
+
+```{r, include=TRUE}
+gender_pcss_tbl(final_rtl_rtp_data_3, gender, total_symptom_score)
+```
+
+##### Age Summary 
+
+```{r, include=TRUE}
+age_pcss_tbl(final_rtl_rtp_data_3, age, total_symptom_score)
+```
+
+##### Visualizations {.tabset .tabset-fade .tabset-pills}
+
+```{r, include=FALSE}
+
+#non age function score plot 
+
+ggplot(final_rtl_rtp_data_3, aes(total_symptom_score)) +
+  geom_histogram(fill = "#56B4E9",
+                color = "white", 
+                alpha = 0.9,
+                bins = 10) +
+  facet_wrap(~gender, ncol = 1) +
+  theme(plot.title = element_text(hjust = 0.5)) +  
+  labs(x = "Score",
+       y = "Number of Individuals",
+       title = "Symptom Score")
+
+symptom_hist <- function(df, x) {
+  ggplot(df, aes({{x}})) +
+  geom_histogram(fill = "#56B4E9",
+                color = "white", 
+                alpha = 0.9,
+                bins = 10) +
+  facet_wrap(~gender, ncol = 1) +
+  theme(plot.title = element_text(hjust = 0.5)) +  
+  labs(x = "Score",
+       y = "Number of Individuals",
+       title = "Symptom Score")
+}
+
+symptom_hist(final_rtl_rtp_data_3, total_symptom_score)
+
+#total score
+age_total_pcss_score <- final_rtl_rtp_data_3 %>% 
+  group_by(age) %>% 
+  nest() %>% 
+  mutate(plots = pmap(list(age, data), 
+  ~ggplot(..2, aes(total_symptom_score)) +
+  geom_histogram(fill = "#56B4E9",
+                color = "white", 
+                alpha = 0.9,
+                bins = 15) +
+  facet_wrap(~gender, ncol = 1) +
+  theme(plot.title = element_text(hjust = 0.5)) +  
+  labs(x = "Score",
+       y = "Number of Individuals", 
+       title = glue("PCSS Total Symptom Score: Age {.x}"))))
+
+age_total_pcss_score$plots[[1]] #age 18
+age_total_pcss_score$plots[[2]] #age 15
+age_total_pcss_score$plots[[3]] #age 14
+age_total_pcss_score$plots[[4]] #age 17
+age_total_pcss_score$plots[[5]] #age 16
+age_total_pcss_score$plots[[6]] #one individual for this one so not really needed 
+
+# headache-migraine cluster
+
+age_headache_migraine_pcss_score <- final_rtl_rtp_data_3 %>% 
+  group_by(age) %>% 
+  nest() %>% 
+  mutate(plots = pmap(list(age, data), 
+  ~ggplot(..2, aes(headache_migraine_cluster_score)) +
+  geom_histogram(fill = "#56B4E9",
+                color = "white", 
+                alpha = 0.9,
+                bins = 15) +
+  facet_wrap(~gender, ncol = 1) +
+  theme(plot.title = element_text(hjust = 0.5)) +  
+  labs(x = "Score",
+       y = "Number of Individuals", 
+       title = glue("PCSS Headache-Migraine Symptoms Cluster Score:\n Age {.x}"))))
+
+age_headache_migraine_pcss_score$plots[[1]] #age 18
+age_headache_migraine_pcss_score$plots[[2]] #age 15
+age_headache_migraine_pcss_score$plots[[3]] #age 14
+age_headache_migraine_pcss_score$plots[[4]] #age 17
+age_headache_migraine_pcss_score$plots[[5]] #age 16
+age_headache_migraine_pcss_score$plots[[6]] #one individual for this one so not really needed 
+
+#cognitive symptoms
+age_cognitive_pcss_score <- final_rtl_rtp_data_3 %>% 
+  group_by(age) %>% 
+  nest() %>% 
+  mutate(plots = pmap(list(age, data), 
+  ~ggplot(..2, aes(cognitive_cluster_score)) +
+  geom_histogram(fill = "#56B4E9",
+                color = "white", 
+                alpha = 0.9,
+                bins = 15) +
+  facet_wrap(~gender, ncol = 1) +
+  theme(plot.title = element_text(hjust = 0.5)) +  
+  labs(x = "Score",
+       y = "Number of Individuals", 
+       title = glue("PCSS Cognitive Symptoms Cluster Score:\n Age {.x}"))))
+
+age_cognitive_pcss_score$plots[[1]] #age 18
+age_cognitive_pcss_score$plots[[2]] #age 15
+age_cognitive_pcss_score$plots[[3]] #age 14
+age_cognitive_pcss_score$plots[[4]] #age 17
+age_cognitive_pcss_score$plots[[5]] #age 16
+age_cognitive_pcss_score$plots[[6]] #one individual for this one so not really needed 
+
+# anxiety mood 
+
+age_anxiety_mood_pcss_score <- final_rtl_rtp_data_3 %>% 
+  group_by(age) %>% 
+  nest() %>% 
+  mutate(plots = pmap(list(age, data), 
+  ~ggplot(..2, aes(anxiety_mood_cluster_score)) +
+  geom_histogram(fill = "#56B4E9",
+                color = "white", 
+                alpha = 0.9,
+                bins = 15) +
+  facet_wrap(~gender, ncol = 1) +
+  theme(plot.title = element_text(hjust = 0.5)) +  
+  labs(x = "Score",
+       y = "Number of Individuals", 
+       title = glue("PCSS Anxiety-Mood Symptoms Cluster Score:\n Age {.x}"))))
+
+age_anxiety_mood_pcss_score$plots[[1]] #age 18
+age_anxiety_mood_pcss_score$plots[[2]] #age 15
+age_anxiety_mood_pcss_score$plots[[3]] #age 14
+age_anxiety_mood_pcss_score$plots[[4]] #age 17
+age_anxiety_mood_pcss_score$plots[[5]] #age 16
+age_anxiety_mood_pcss_score$plots[[6]] #one individual for this one so not really needed 
+
+
+#ocular-motor
+
+age_ocular_motor_pcss_score <- final_rtl_rtp_data_3 %>% 
+  group_by(age) %>% 
+  nest() %>% 
+  mutate(plots = pmap(list(age, data), 
+  ~ggplot(..2, aes(ocular_motor_cluster_score)) +
+  geom_histogram(fill = "#56B4E9",
+                color = "white", 
+                alpha = 0.9,
+                bins = 15) +
+  facet_wrap(~gender, ncol = 1) +
+  theme(plot.title = element_text(hjust = 0.5)) +  
+  labs(x = "Score",
+       y = "Number of Individuals", 
+       title = glue("PCSS Ocular-Motor Symptoms Cluster Score:\n Age {.x}"))))
+
+age_ocular_motor_pcss_score$plots[[1]] #age 18
+age_ocular_motor_pcss_score$plots[[2]] #age 15
+age_ocular_motor_pcss_score$plots[[3]] #age 14
+age_ocular_motor_pcss_score$plots[[4]] #age 17
+age_ocular_motor_pcss_score$plots[[5]] #age 16
+age_ocular_motor_pcss_score$plots[[6]] #one individual for this one so not really needed 
+
+
+#vestibular symptoms 
+
+age_vestibular_pcss_score <- final_rtl_rtp_data_3 %>% 
+  group_by(age) %>% 
+  nest() %>% 
+  mutate(plots = pmap(list(age, data), 
+  ~ggplot(..2, aes(vestibular_cluster_score)) +
+  geom_histogram(fill = "#56B4E9",
+                color = "white", 
+                alpha = 0.9,
+                bins = 15) +
+  facet_wrap(~gender, ncol = 1) +
+  theme(plot.title = element_text(hjust = 0.5)) +  
+  labs(x = "Score",
+       y = "Number of Individuals", 
+       title = glue("PCSS Vestibular Symptoms Cluster Score:\n Age {.x}"))))
+
+age_vestibular_pcss_score$plots[[1]] #age 18
+age_vestibular_pcss_score$plots[[2]] #age 15
+age_vestibular_pcss_score$plots[[3]] #age 14
+age_vestibular_pcss_score$plots[[4]] #age 17
+age_vestibular_pcss_score$plots[[5]] #age 16
+age_vestibular_pcss_score$plots[[6]] #one individual for this one so not really needed 
+
+
+# sleep symptoms 
+
+age_sleep_pcss_score <- final_rtl_rtp_data_3 %>% 
+  group_by(age) %>% 
+  nest() %>% 
+  mutate(plots = pmap(list(age, data), 
+  ~ggplot(..2, aes(sleep_cluster_score)) +
+  geom_histogram(fill = "#56B4E9",
+                color = "white", 
+                alpha = 0.9,
+                bins = 15) +
+  facet_wrap(~gender, ncol = 1) +
+  theme(plot.title = element_text(hjust = 0.5)) +  
+  labs(x = "Score",
+       y = "Number of Individuals", 
+       title = glue("PCSS Sleep Symptoms Cluster Score:\n Age {.x}"))))
+
+age_sleep_pcss_score$plots[[1]] #age 18
+age_sleep_pcss_score$plots[[2]] #age 15
+age_sleep_pcss_score$plots[[3]] #age 14
+age_sleep_pcss_score$plots[[4]] #age 17
+age_sleep_pcss_score$plots[[5]] #age 16
+age_sleep_pcss_score$plots[[6]] #one individual for this one so not really needed 
+```
+
+###### All Ages 
+
+```{r, include=TRUE, fig.height=6}
+symptom_hist(final_rtl_rtp_data_3, total_symptom_score)
+```
+
+###### Age 14
+
+```{r, include=TRUE, fig.height=6}
+age_total_pcss_score$plots[[3]]
+```
+
+###### Age 15
+
+```{r, include=TRUE, fig.height=6}
+age_total_pcss_score$plots[[2]]
+```
+
+###### Age 16
+
+```{r, include=TRUE, fig.height=6}
+age_total_pcss_score$plots[[5]]
+```
+
+###### Age 17
+
+```{r, include=TRUE, fig.height=6}
+age_total_pcss_score$plots[[4]]
+```
+
+###### Age 18
+
+```{r, include=TRUE, fig.height=6}
+age_total_pcss_score$plots[[1]]
+```
+
+
+#### Headache-Migraine Symptoms Cluster (Total Possible Score: 18) {.tabset .tabset-fade .tabset-pills}
+
+##### Summary 
+
+```{r, include=TRUE}
+create_react(final_rtl_rtp_data_3, headache_migraine_cluster_score)
+```
+
+##### Gender Summary
+
+```{r, include=TRUE}
+gender_pcss_tbl(final_rtl_rtp_data_3, gender, headache_migraine_cluster_score)
+```
+
+##### Age Summary 
+
+```{r, include=TRUE}
+age_pcss_tbl(final_rtl_rtp_data_3, age, headache_migraine_cluster_score)
+```
+
+
+##### Visualizations {.tabset .tabset-fade .tabset-pills}
+
+###### All Ages 
+
+```{r, include=TRUE, fig.height=6}
+symptom_hist(final_rtl_rtp_data_3, headache_migraine_cluster_score)
+```
+
+###### Age 14
+
+```{r, include=TRUE, fig.height=6}
+age_headache_migraine_pcss_score$plots[[3]]
+```
+
+###### Age 15
+
+```{r, include=TRUE, fig.height=6}
+age_headache_migraine_pcss_score$plots[[2]]
+```
+
+###### Age 16
+
+```{r, include=TRUE, fig.height=6}
+age_headache_migraine_pcss_score$plots[[5]]
+```
+
+###### Age 17
+
+```{r, include=TRUE, fig.height=6}
+age_headache_migraine_pcss_score$plots[[4]]
+```
+
+###### Age 18
+
+```{r, include=TRUE, fig.height=6}
+age_headache_migraine_pcss_score$plots[[1]]
+```
+
+#### Cognitive Symptoms Cluster (Total Possible Score: 24) {.tabset .tabset-fade .tabset-pills}
+
+##### Summary 
+
+```{r, include=TRUE}
+create_react(final_rtl_rtp_data_3, cognitive_cluster_score)
+```
+
+##### Gender Summary
+
+```{r, include=TRUE}
+gender_pcss_tbl(final_rtl_rtp_data_3, gender, cognitive_cluster_score)
+```
+
+##### Age Summary 
+
+```{r, include=TRUE}
+age_pcss_tbl(final_rtl_rtp_data_3, age, cognitive_cluster_score)
+```
+
+
+##### Visualizations {.tabset .tabset-fade .tabset-pills}
+
+###### All Ages 
+
+```{r, include=TRUE, fig.height=6}
+symptom_hist(final_rtl_rtp_data_3, cognitive_cluster_score)
+```
+
+###### Age 14
+
+```{r, include=TRUE, fig.height=6}
+age_cognitive_pcss_score$plots[[3]]
+```
+
+###### Age 15
+
+```{r, include=TRUE, fig.height=6}
+age_cognitive_pcss_score$plots[[2]]
+```
+
+###### Age 16
+
+```{r, include=TRUE, fig.height=6}
+age_cognitive_pcss_score$plots[[5]]
+```
+
+###### Age 17
+
+```{r, include=TRUE, fig.height=6}
+age_cognitive_pcss_score$plots[[4]]
+```
+
+###### Age 18
+
+```{r, include=TRUE, fig.height=6}
+age_cognitive_pcss_score$plots[[1]]
+```
+
+
+#### Anxiety-Mood Symptoms Cluster (Total Possible Score: 30) {.tabset .tabset-fade .tabset-pills}
+
+##### Summary 
+
+```{r, include=TRUE}
+create_react(final_rtl_rtp_data_3, anxiety_mood_cluster_score)
+```
+
+##### Gender Summary
+
+```{r, include=TRUE}
+gender_pcss_tbl(final_rtl_rtp_data_3, gender, anxiety_mood_cluster_score)
+```
+
+##### Age Summary 
+
+```{r, include=TRUE}
+age_pcss_tbl(final_rtl_rtp_data_3, age, anxiety_mood_cluster_score)
+```
+
+
+##### Visualizations {.tabset .tabset-fade .tabset-pills}
+
+###### All Ages 
+
+```{r, include=TRUE, fig.height=6}
+symptom_hist(final_rtl_rtp_data_3, anxiety_mood_cluster_score)
+```
+
+###### Age 14
+
+```{r, include=TRUE, fig.height=6}
+age_anxiety_mood_pcss_score$plots[[3]]
+```
+
+###### Age 15
+
+```{r, include=TRUE, fig.height=6}
+age_anxiety_mood_pcss_score$plots[[2]]
+```
+
+###### Age 16
+
+```{r, include=TRUE, fig.height=6}
+age_anxiety_mood_pcss_score$plots[[5]]
+```
+
+###### Age 17
+
+```{r, include=TRUE, fig.height=6}
+age_anxiety_mood_pcss_score$plots[[4]]
+```
+
+###### Age 18
+
+```{r, include=TRUE, fig.height=6}
+age_anxiety_mood_pcss_score$plots[[1]]
+```
+
+
+#### Ocular-Motor Symptoms Cluster (Total Possible Score: 6) {.tabset .tabset-fade .tabset-pills}
+
+##### Summary 
+
+```{r, include=TRUE}
+create_react(final_rtl_rtp_data_3, ocular_motor_cluster_score)
+```
+
+##### Gender Summary
+
+```{r, include=TRUE}
+gender_pcss_tbl(final_rtl_rtp_data_3, gender, ocular_motor_cluster_score)
+```
+
+##### Age Summary 
+
+```{r, include=TRUE}
+age_pcss_tbl(final_rtl_rtp_data_3, age, ocular_motor_cluster_score)
+```
+
+
+##### Visualizations {.tabset .tabset-fade .tabset-pills}
+
+###### All Ages 
+
+```{r, include=TRUE, fig.height=6}
+symptom_hist(final_rtl_rtp_data_3, ocular_motor_cluster_score)
+```
+
+###### Age 14
+
+```{r, include=TRUE, fig.height=6}
+age_ocular_motor_pcss_score$plots[[3]]
+```
+
+###### Age 15
+
+```{r, include=TRUE, fig.height=6}
+age_ocular_motor_pcss_score$plots[[2]]
+```
+
+###### Age 16
+
+```{r, include=TRUE, fig.height=6}
+age_ocular_motor_pcss_score$plots[[5]]
+```
+
+###### Age 17
+
+```{r, include=TRUE, fig.height=6}
+age_ocular_motor_pcss_score$plots[[4]]
+```
+
+###### Age 18
+
+```{r, include=TRUE, fig.height=6}
+age_ocular_motor_pcss_score$plots[[1]]
+```
+
+
+#### Vestibular Symptoms Cluster (Total Possible Score: 24) {.tabset .tabset-fade .tabset-pills}
+
+##### Summary 
+
+```{r, include=TRUE}
+create_react(final_rtl_rtp_data_3, vestibular_cluster_score)
+```
+
+##### Gender Summary
+
+```{r, include=TRUE}
+gender_pcss_tbl(final_rtl_rtp_data_3, gender, vestibular_cluster_score)
+```
+
+##### Age Summary 
+
+```{r, include=TRUE}
+age_pcss_tbl(final_rtl_rtp_data_3, age, vestibular_cluster_score)
+```
+
+
+##### Visualizations {.tabset .tabset-fade .tabset-pills}
+
+###### All Ages 
+
+```{r, include=TRUE, fig.height=6}
+symptom_hist(final_rtl_rtp_data_3, vestibular_cluster_score)
+```
+
+###### Age 14
+
+```{r, include=TRUE, fig.height=6}
+age_vestibular_pcss_score$plots[[3]]
+```
+
+###### Age 15
+
+```{r, include=TRUE, fig.height=6}
+age_vestibular_pcss_score$plots[[2]]
+```
+
+###### Age 16
+
+```{r, include=TRUE, fig.height=6}
+age_vestibular_pcss_score$plots[[5]]
+```
+
+###### Age 17
+
+```{r, include=TRUE, fig.height=6}
+age_vestibular_pcss_score$plots[[4]]
+```
+
+###### Age 18
+
+```{r, include=TRUE, fig.height=6}
+age_vestibular_pcss_score$plots[[1]]
+```
+
+
+#### Sleep Symptoms Cluster (Total Possible Score: 30) {.tabset .tabset-fade .tabset-pills}
+
+##### Summary 
+
+```{r, include=TRUE}
+create_react(final_rtl_rtp_data_3, sleep_cluster_score)
+```
+
+##### Gender Summary
+
+```{r, include=TRUE}
+gender_pcss_tbl(final_rtl_rtp_data_3, gender, sleep_cluster_score)
+```
+
+##### Age Summary 
+
+```{r, include=TRUE}
+age_pcss_tbl(final_rtl_rtp_data_3, age, sleep_cluster_score)
+```
+
+
+##### Visualizations {.tabset .tabset-fade .tabset-pills}
+
+###### All Ages 
+
+```{r, include=TRUE, fig.height=6}
+symptom_hist(final_rtl_rtp_data_3, sleep_cluster_score)
+```
+
+###### Age 14
+
+```{r, include=TRUE, fig.height=6}
+age_sleep_pcss_score$plots[[3]]
+```
+
+###### Age 15
+
+```{r, include=TRUE, fig.height=6}
+age_sleep_pcss_score$plots[[2]]
+```
+
+###### Age 16
+
+```{r, include=TRUE, fig.height=6}
+age_sleep_pcss_score$plots[[5]]
+```
+
+###### Age 17
+
+```{r, include=TRUE, fig.height=6}
+age_sleep_pcss_score$plots[[4]]
+```
+
+###### Age 18
+
+```{r, include=TRUE, fig.height=6}
+age_sleep_pcss_score$plots[[1]]
+```
