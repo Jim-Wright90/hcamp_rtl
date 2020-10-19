@@ -31,6 +31,7 @@ library(fs)
 library(rstatix)
 library(ggpubr)
 library(writexl)
+library(remotes)
 
 theme_set(theme_minimal(15) +
             theme(legend.position = "bottom",
@@ -2097,4 +2098,925 @@ age_sleep_pcss_score$plots[[4]]
 
 ```{r, include=TRUE, fig.height=6}
 age_sleep_pcss_score$plots[[1]]
+```
+
+## What is the relation between reported symptoms (as measured by the PCSS at the time of ImPACT testing) and the duration of time from injury onset to completion of the full RTP protocol? 
+
+### Visual Relationships {.tabset .tabset-fade .tabset-pills}
+
+```{r, include=FALSE}
+
+
+ggplot(final_rtl_rtp_data_3, aes(total_symptom_score, onset_rtp_total_days)) +
+  geom_point() +
+  geom_smooth() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Symptom Score",
+       y = "Number of Days")
+
+symptom_day_scatter <- function(df, x, y) {
+  ggplot(df, aes({{x}}, {{y}})) +
+  geom_point() +
+  geom_smooth() +
+  labs(x = "Symptom Score",
+       y = "Number of Days")
+}
+
+symptom_day_scatter(final_rtl_rtp_data_3, total_symptom_score, onset_rtp_total_days) +
+  labs(title = "PCSS Total Symptom Score")
+```
+
+#### Total Symptom Score
+
+```{r, include=TRUE}
+symptom_day_scatter(final_rtl_rtp_data_3, total_symptom_score, onset_rtp_total_days) +
+  labs(title = "PCSS Total Symptom Score")
+```
+
+#### Headache-Migraine Symptoms Cluster
+
+```{r, include=TRUE}
+symptom_day_scatter(final_rtl_rtp_data_3, headache_migraine_cluster_score, onset_rtp_total_days) +
+  labs(title = "Headache-Migraine Cluster")
+```
+
+#### Cognitive Symptoms Cluster
+
+```{r, include=TRUE}
+symptom_day_scatter(final_rtl_rtp_data_3, cognitive_cluster_score, onset_rtp_total_days) +
+  labs(title = "Cognitive Cluster")
+```
+
+#### Anxiety-Mood Symptoms Cluster
+
+```{r, include=TRUE}
+symptom_day_scatter(final_rtl_rtp_data_3, anxiety_mood_cluster_score, onset_rtp_total_days) +
+  labs(title = "Anxiety-Mood Cluster")
+```
+
+#### Ocular-Motor Symptoms Cluster
+
+```{r, include=TRUE}
+symptom_day_scatter(final_rtl_rtp_data_3, ocular_motor_cluster_score, onset_rtp_total_days) +
+  labs(title = "Ocular-Motor Cluster")
+```
+
+#### Vestibular Symptoms Cluster
+
+```{r, include=TRUE}
+symptom_day_scatter(final_rtl_rtp_data_3, vestibular_cluster_score, onset_rtp_total_days) +
+  labs(title = "Vestibular Cluster")
+```
+
+#### Sleep Symptoms Cluster
+
+```{r, include=TRUE}
+symptom_day_scatter(final_rtl_rtp_data_3, sleep_cluster_score, onset_rtp_total_days) +
+  labs(title = "Sleep Cluster")
+```
+
+### Correlation {.tabset .tabset-fade .tabset-pills}
+
+#### Total Symptom Score
+
+```{r, include=TRUE}
+cor(final_rtl_rtp_data_3$total_symptom_score, final_rtl_rtp_data_3$onset_rtp_total_days)
+```
+
+#### Headache-Migraine Symptoms Cluster
+
+```{r, include=TRUE}
+cor(final_rtl_rtp_data_3$headache_migraine_cluster_score, 
+    final_rtl_rtp_data_3$onset_rtp_total_days)
+```
+
+#### Cognitive Symptoms Cluster
+
+```{r, include=TRUE}
+cor(final_rtl_rtp_data_3$cognitive_cluster_score, 
+    final_rtl_rtp_data_3$onset_rtp_total_days)
+```
+
+#### Anxiety-Mood Symptoms Cluster
+
+```{r, include=TRUE}
+cor(final_rtl_rtp_data_3$anxiety_mood_cluster_score, 
+    final_rtl_rtp_data_3$onset_rtp_total_days)
+```
+
+#### Ocular-Motor Symptoms Cluster
+
+```{r, include=TRUE}
+cor(final_rtl_rtp_data_3$ocular_motor_cluster_score, 
+    final_rtl_rtp_data_3$onset_rtp_total_days)
+```
+
+#### Vestibular Symptoms Cluster
+
+```{r, include=TRUE}
+cor(final_rtl_rtp_data_3$vestibular_cluster_score, 
+    final_rtl_rtp_data_3$onset_rtp_total_days)
+```
+
+#### Sleep Symptoms Cluster
+
+```{r, include=TRUE}
+cor(final_rtl_rtp_data_3$sleep_cluster_score, 
+    final_rtl_rtp_data_3$onset_rtp_total_days)
+```
+
+
+#### Correlation Table 
+
+```{r, include=FALSE}
+
+rtp_coor_df <- data.frame("pcss_level" = c("Total Symptom Score",
+                                           "Headache-Migraine Symptoms Cluster",
+                                           "Cognitive Symptoms Cluster",
+                                           "Anxiety-Mood Symptoms Cluster",
+                                           "Ocular-Motor Symptoms Cluster",
+                                           "Vestibular Symptoms Cluster",
+                                           "Sleep Symptoms Cluster"),
+                          "coorrelation_value" = c(0.16,
+                                                  0.12,
+                                                  0.18,
+                                                  0.13,
+                                                  0.22,
+                                                  0.13,
+                                                  0.10))
+
+
+orange_pal <- function(x) rgb(colorRamp(c("#ffe4cc", "#ffb54d"))(x), maxColorValue = 255)
+
+rtp_coor_tbl <- rtp_coor_df %>% 
+  reactable(
+    columns = list(
+      pcss_level = colDef(name = "PCSS Level",
+                          align = "center"),
+      coorrelation_value = colDef(name = "Coorrelation Value",
+                                  align = "center",
+                                    style = function(value) {
+                                      normalized <- (value - min(rtp_coor_df$coorrelation_value)) / (max(rtp_coor_df$coorrelation_value) - min(rtp_coor_df$coorrelation_value))
+                                      color <- orange_pal(normalized)
+                                      list(background = color)
+                                    }
+                                      )),
+    pagination = FALSE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE,
+    height = 600,
+    width = 500)
+
+rtp_coor_tbl
+```
+
+```{r, include=TRUE}
+rtp_coor_tbl
+```
+
+### Normality Check {.tabset .tabset-fade .tabset-pills}
+
+Extreme outliers exist for all predictor and outcome variables, where predictor variables correspond to the PCSS total symptom and cluster scores, and the outcome variables correspond to the duration of time to complete the RTL and RTP process. 
+
+```{r, include=FALSE}
+ggplot(final_rtl_rtp_data_3, aes(sample = onset_rtp_total_days)) +
+  stat_qq_line(color = "#56B4E9") +
+  geom_qq(color = "gray40")
+
+qq_norm <- function(df, x) {
+  ggplot(df, aes(sample = {{x}})) +
+  stat_qq_line(color = "#56B4E9") +
+  geom_qq(color = "gray40")
+}
+
+qq_norm(final_rtl_rtp_data_3, onset_rtp_total_days)
+```
+
+#### Onset to RTP Completion 
+
+
+```{r, include=TRUE}
+qq_norm(final_rtl_rtp_data_3, onset_rtp_total_days)
+```
+
+
+#### PCSS Total Score
+
+
+```{r, include=TRUE}
+qq_norm(final_rtl_rtp_data_3, total_symptom_score)
+```
+
+#### Headache-Migraine Symptoms Cluster
+
+```{r, include=TRUE}
+qq_norm(final_rtl_rtp_data_3, headache_migraine_cluster_score)
+```
+
+#### Cognitive Symptoms Cluster
+
+```{r, include=TRUE}
+qq_norm(final_rtl_rtp_data_3, cognitive_cluster_score)
+```
+
+#### Anxiety-Mood Symptoms Cluster
+
+```{r, include=TRUE}
+qq_norm(final_rtl_rtp_data_3, anxiety_mood_cluster_score)
+```
+
+#### Ocular-Motor Symptoms Cluster
+
+```{r, include=TRUE}
+qq_norm(final_rtl_rtp_data_3, ocular_motor_cluster_score)
+```
+
+#### Vestibular Symptoms Cluster
+
+```{r, include=TRUE}
+qq_norm(final_rtl_rtp_data_3, vestibular_cluster_score)
+```
+
+#### Sleep Symptoms Cluster
+
+```{r, include=TRUE}
+qq_norm(final_rtl_rtp_data_3, sleep_cluster_score)
+```
+
+### Models {.tabset .tabset-fade .tabset-pills}
+
+```{r, include=FALSE}
+model_data <- final_rtl_rtp_data_3 %>% 
+  mutate(age = as.factor(age))
+
+model_data <- model_data %>% 
+  rename_at(.vars = vars(ends_with("_cluster_score")),
+            .funs = funs(sub("_cluster_score", "", .)))
+
+total_symptom_model_1 <- lm(onset_rtp_total_days ~ total_symptom_score, data = model_data)
+
+arm::display(total_symptom_model_1)
+summary(total_symptom_model_1)
+
+
+gender_only_model <- lm(onset_rtp_total_days ~ gender, data = model_data)
+
+summary(gender_only_model)
+
+anova(total_symptom_model_1, gender_only_model)
+
+sundry::aic_weights(total_symptom_model_1, gender_only_model)
+
+# Symptom score better fit than gender
+
+age_only_model <- lm(onset_rtp_total_days ~ age, data = model_data)
+
+summary(age_only_model)
+
+
+total_symptom_model_gender <- lm(onset_rtp_total_days ~ total_symptom_score + gender,
+                                 data = model_data)
+
+summary(total_symptom_model_gender)
+
+total_symptom_model_age <- lm(onset_rtp_total_days ~ total_symptom_score + age,
+                                 data = model_data)
+
+summary(total_symptom_model_age)
+
+summary(total_symptom_model_1)$r.squared
+summary(total_symptom_model_gender)$r.squared
+summary(total_symptom_model_age)$r.squared
+
+summary(total_symptom_model_gender)$r.squared - summary(total_symptom_model_1)$r.squared
+
+anova(total_symptom_model_1, total_symptom_model_age, total_symptom_model_gender)
+
+sundry::aic_weights(total_symptom_model_1, total_symptom_model_gender, total_symptom_model_age, gender_only_model)
+
+# Total symptoms still seem like best model - age doesn't appear to be a major factor
+
+
+#Individual symptom cluster long way
+
+cluster_mod_1 <- lm(onset_rtp_total_days ~ headache_migraine, data = model_data)
+summary(cluster_mod_1)
+
+cluster_mod_2 <- lm(onset_rtp_total_days ~ cognitive, data = model_data)
+summary(cluster_mod_2)
+
+cluster_mod_3 <- lm(onset_rtp_total_days ~ anxiety_mood, data = model_data)
+summary(cluster_mod_3)
+
+cluster_mod_4 <- lm(onset_rtp_total_days ~ ocular_motor, data = model_data)
+summary(cluster_mod_4)
+
+cluster_mod_5 <- lm(onset_rtp_total_days ~ vestibular, data = model_data)
+summary(cluster_mod_5)
+
+cluster_mod_6 <- lm(onset_rtp_total_days ~ sleep, data = model_data)
+summary(cluster_mod_6)
+
+
+sundry::aic_weights(cluster_mod_1,
+                    cluster_mod_2,
+                    cluster_mod_3,
+                    cluster_mod_4,
+                    cluster_mod_5,
+                    cluster_mod_6)
+
+# Ocular-motor (4) and cognitive (2) appear to be best models 
+```
+
+```{r, include=FALSE}
+#purr approach 
+
+symptom_cluster_data_long <- model_data %>% 
+  pivot_longer(
+    cols = c(58:63),
+    names_to = "symptom_cluster",
+    values_to = "cluster_score"
+  )
+  
+by_cluster <- split(symptom_cluster_data_long, symptom_cluster_data_long$symptom_cluster)
+  
+str(by_cluster)
+
+mods <- map(by_cluster, ~lm(onset_rtp_total_days ~ cluster_score, data = .x))
+
+
+str(mods)
+
+
+coef(mods[[1]])
+coef(mods[[2]])
+
+coefs <- map(mods, coef)
+
+coefs[c(1:2, length(coefs))]
+
+slopes <- map_dbl(coefs, 2)
+
+slopes
+
+relation <- tibble(year = names(slopes),
+                   slope = slopes)
+
+ggplot(relation, aes(slope)) +
+    geom_histogram(fill = "cornflowerblue",
+                   color = "white",
+                   bins = 5)
+
+```
+
+
+```{r, include=FALSE}
+#list column approach with gender 
+
+mods_list_column <- model_data %>% 
+  nest(-gender) %>% 
+  mutate(m1 = map(data, ~lm(onset_rtp_total_days ~ headache_migraine, data = .x)),
+         m2 = map(data, ~lm(onset_rtp_total_days ~ cognitive, data = .x)),
+         m3 = map(data, ~lm(onset_rtp_total_days ~ anxiety_mood, data = .x)),
+         m4 = map(data, ~lm(onset_rtp_total_days ~ ocular_motor, data = .x)),
+         m5 = map(data, ~lm(onset_rtp_total_days ~ vestibular, data = .x)),
+         m6 = map(data, ~lm(onset_rtp_total_days ~ sleep, data = .x)))
+
+mods_list_column
+
+mods_list_column$m1[[1]]
+mods_list_column$m2[[1]]
+mods_list_column$m3[[1]]
+mods_list_column$m4[[1]]
+mods_list_column$m5[[1]]
+mods_list_column$m6[[1]]
+
+compare_1 <- anova(mods_list_column$m2[[1]], mods_list_column$m4[[1]])
+compare_1
+
+str(compare_1)
+compare_1$`Pr(>F)`
+
+
+mods_list_column %>%
+    pivot_longer(m1:m6, names_to = "model", values_to = "output") %>% 
+    mutate(r2 = map_dbl(output, ~summary(.x)$r.squared)) %>%
+ggplot(aes(model, r2)) +
+    geom_col(aes(fill = model)) +
+    facet_wrap(~gender) +
+    guides(fill = "none") +
+    scale_fill_brewer(palette = "Set2")
+
+
+
+
+  
+```
+
+#### Model 1
+
+Linear model of the relationship between total PCSS symptom score and the duration of time to complete RTP protocol 
+
+Model strengths: 
+
+* Both the intercept and slope have significant *p*-values, suggesting there is a relationship between total PCSS symptom score and the duration of time to complete the RTP protocol. 
+* The *t*-values aren't very large, but they are far enough away from 0 to suggest the coefficients are not equal to 0 by chance. 
+
+Model weakness:
+
+* The model does not account for much variance, as indicated by the R-squared and adjusted R-squared values. This is likely due to the presence of outliers and overall variance in PCSS total symptom scores. In my opinion, this model would be stronger with a larger sample size. 
+
+Overall Interpretation: 
+
+There does appear to be a relationship between PCSS total symptom score and the duration of time to complete the RTP protocol; however, the model is weakened by the presence of outliers and high level of variance in both the predictor (total PCSS score) and outcome variable (RTP completion time).
+
+```{r, include=TRUE}
+summary(total_symptom_model_1)
+```
+
+#### Model 2
+
+Multiple regression model where gender has been added as a predictor variable. 
+
+Model Strength: 
+
+* The relationship between PCSS total score and RTP completion time continues to be significant. 
+
+Model Weakness: 
+
+* The addition of the gender variable did not generate a significant result, suggesting gender is not a strong predictor of RTP completion time. 
+* The model continues to not account for much variance, evident by the low Adjusted R-squared value. 
+
+
+```{r, include=TRUE}
+summary(total_symptom_model_gender)
+```
+
+#### Model 3
+
+Multiple regression model where age has been added as a predictor variable. 
+
+Model Strength: 
+
+* The relationship between PCSS total score and RTP completion time continues to be significant. 
+
+Model Weakness: 
+
+* The addition of the age variable did not generate a significant result, suggesting age is not a strong predictor of RTP completion time. 
+* The model continues to not account for much variance, evident by the low Adjusted R-squared value. 
+
+
+```{r, include=TRUE}
+summary(total_symptom_model_age)
+```
+
+
+#### Models 1-3 Comparison
+
+The total symptom score model has the lowest AIC value (as indicated by the "delta" value), suggested it is the strongest model of the three compared. Lower AIC values indicate stronger model fit. 
+
+```{r, include=TRUE}
+sundry::aic_weights(total_symptom_model_1, total_symptom_model_gender, total_symptom_model_age, gender_only_model)
+```
+
+#### Model 4
+
+Linear model between the headache-migraine symptoms cluster score and duration of time to complete RTP protocol. The headache-migraine coefficient is not significant, suggesting this model is not a good fit. 
+
+```{r, include=TRUE}
+summary(cluster_mod_1)
+```
+
+#### Model 5
+
+Linear model between the cognitive symptoms cluster score and duration of time to complete RTP protocol. The cognitive coefficient is significant, suggesting there is evidence for a slight relationship between cognitive symptom severity and RTP completion duration. However, it should be stated that this model accounts for very little variance as indicated by the R-squared and Adjusted R-squared values. 
+
+```{r, include=TRUE}
+summary(cluster_mod_2)
+```
+
+
+#### Model 6
+
+Linear model between the anxiety-mood symptoms cluster score and duration of time to complete RTP protocol. The anxiety-mood coefficient is not significant, suggesting this model is not a good fit. 
+
+```{r, include=TRUE}
+summary(cluster_mod_3)
+```
+
+#### Model 7
+
+Linear model between the ocular-motor symptoms cluster score and duration of time to complete RTP protocol. The ocular-motor coefficient is significant, suggesting there is evidence for a slight relationship between ocular-motor symptom severity and RTP completion duration. However, it should be stated that this model accounts for very little variance as indicated by the R-squared and Adjusted R-squared values. I also wonder how sensitive this model is as the ocular-motor cluster corresponds to only one symptom, while the other clusters correspond to 3-5 symptoms. 
+
+```{r, include=TRUE}
+summary(cluster_mod_4)
+```
+
+
+#### Model 8
+
+Linear model between the vestibular symptoms cluster score and duration of time to complete RTP protocol. The vestibular coefficient is not significant, suggesting this model is not a good fit. 
+
+```{r, include=TRUE}
+summary(cluster_mod_5)
+```
+
+
+#### Model 9
+
+Linear model between the sleep symptoms cluster score and duration of time to complete RTP protocol. The sleep coefficient is not significant, suggesting this model is not a good fit. 
+
+```{r, include=TRUE}
+summary(cluster_mod_6)
+```
+
+#### Cognitive and Ocular-Motor Model
+
+The relationship between the cognitive symptom cluster and ocular-motor symptom cluster was analyzed with a multiple regression model. The results of the model reduced the cognitive coefficient to non-significance, while the ocular-motor coefficient remained slightly significant. As with the previous models, the amount of variance accounted by the model continues to be low.
+
+```{r, include=FALSE}
+
+cognitive_ocular_motor_rtp_mod <- lm(onset_rtp_total_days ~ cognitive + ocular_motor, 
+                                     data = model_data)
+
+
+```
+
+```{r, include=TRUE}
+summary(cognitive_ocular_motor_rtp_mod)
+```
+
+#### Cognitive and Ocular-Motor Model Comparison
+
+The ocular motor model is the strongest model, but there could possibly be a case to include cognition in a multiple regression model. Overall, these two symptom clusters appear to be the strongest predictors of RTP duration, but all models are limited due the low R and Adjusted R values. This is likely due to a smaller sample size, variance in predictor and outcome variables, and the presence of outliers. 
+
+```{r, include=TRUE}
+sundry::aic_weights(cluster_mod_2, cluster_mod_4, cognitive_ocular_motor_rtp_mod)
+```
+
+
+
+## What is the relation between reported symptoms (as measured by the PCSS at the time of ImPACT testing) and the duration of time from injury onset to completion of the RTL (RTP protcol step 2)? 
+### Visual Relationships {.tabset .tabset-fade .tabset-pills}
+
+#### Total Symptom Score
+
+```{r, include=TRUE}
+symptom_day_scatter(final_rtl_rtp_data_3, total_symptom_score, onset_rtl_total_days) +
+  labs(title = "PCSS Total Symptom Score")
+```
+
+#### Headache-Migraine Symptoms Cluster
+
+```{r, include=TRUE}
+symptom_day_scatter(final_rtl_rtp_data_3, headache_migraine_cluster_score, onset_rtl_total_days) +
+  labs(title = "Headache-Migraine Cluster")
+```
+
+#### Cognitive Symptoms Cluster
+
+```{r, include=TRUE}
+symptom_day_scatter(final_rtl_rtp_data_3, cognitive_cluster_score, onset_rtl_total_days) +
+  labs(title = "Cognitive Cluster")
+```
+
+#### Anxiety-Mood Symptoms Cluster
+
+```{r, include=TRUE}
+symptom_day_scatter(final_rtl_rtp_data_3, anxiety_mood_cluster_score, onset_rtl_total_days) +
+  labs(title = "Anxiety-Mood Cluster")
+```
+
+#### Ocular-Motor Symptoms Cluster
+
+```{r, include=TRUE}
+symptom_day_scatter(final_rtl_rtp_data_3, ocular_motor_cluster_score, onset_rtl_total_days) +
+  labs(title = "Ocular-Motor Cluster")
+```
+
+#### Vestibular Symptoms Cluster
+
+```{r, include=TRUE}
+symptom_day_scatter(final_rtl_rtp_data_3, vestibular_cluster_score, onset_rtl_total_days) +
+  labs(title = "Vestibular Cluster")
+```
+
+#### Sleep Symptoms Cluster
+
+```{r, include=TRUE}
+symptom_day_scatter(final_rtl_rtp_data_3, sleep_cluster_score, onset_rtl_total_days) +
+  labs(title = "Sleep Cluster")
+```
+
+### Correlation {.tabset .tabset-fade .tabset-pills}
+
+#### Total Symptom Score
+
+```{r, include=TRUE}
+cor(final_rtl_rtp_data_3$total_symptom_score, final_rtl_rtp_data_3$onset_rtl_total_days)
+```
+
+#### Headache-Migraine Symptoms Cluster
+
+```{r, include=TRUE}
+cor(final_rtl_rtp_data_3$headache_migraine_cluster_score, 
+    final_rtl_rtp_data_3$onset_rtl_total_days)
+```
+
+#### Cognitive Symptoms Cluster
+
+```{r, include=TRUE}
+cor(final_rtl_rtp_data_3$cognitive_cluster_score, 
+    final_rtl_rtp_data_3$onset_rtl_total_days)
+```
+
+#### Anxiety-Mood Symptoms Cluster
+
+```{r, include=TRUE}
+cor(final_rtl_rtp_data_3$anxiety_mood_cluster_score, 
+    final_rtl_rtp_data_3$onset_rtl_total_days)
+```
+
+#### Ocular-Motor Symptoms Cluster
+
+```{r, include=TRUE}
+cor(final_rtl_rtp_data_3$ocular_motor_cluster_score, 
+    final_rtl_rtp_data_3$onset_rtl_total_days)
+```
+
+#### Vestibular Symptoms Cluster
+
+```{r, include=TRUE}
+cor(final_rtl_rtp_data_3$vestibular_cluster_score, 
+    final_rtl_rtp_data_3$onset_rtl_total_days)
+```
+
+#### Sleep Symptoms Cluster
+
+```{r, include=TRUE}
+cor(final_rtl_rtp_data_3$sleep_cluster_score, 
+    final_rtl_rtp_data_3$onset_rtl_total_days)
+```
+
+#### Correlation Table 
+
+```{r, include=FALSE}
+
+rtl_coor_df <- data.frame("pcss_level" = c("Total Symptom Score",
+                                           "Headache-Migraine Symptoms Cluster",
+                                           "Cognitive Symptoms Cluster",
+                                           "Anxiety-Mood Symptoms Cluster",
+                                           "Ocular-Motor Symptoms Cluster",
+                                           "Vestibular Symptoms Cluster",
+                                           "Sleep Symptoms Cluster"),
+                          "coorrelation_value" = c(0.07,
+                                                  0.03,
+                                                  0.11,
+                                                  0.09,
+                                                  -0.03,
+                                                  -0.01,
+                                                  0.10))
+
+
+
+rtl_coor_tbl <- rtl_coor_df %>% 
+  reactable(
+    columns = list(
+      pcss_level = colDef(name = "PCSS Level",
+                          align = "center"),
+      coorrelation_value = colDef(name = "Coorrelation Value",
+                                  align = "center",
+                                    style = function(value) {
+                                      normalized <- (value - min(rtl_coor_df$coorrelation_value)) / (max(rtl_coor_df$coorrelation_value) - min(rtl_coor_df$coorrelation_value))
+                                      color <- orange_pal(normalized)
+                                      list(background = color)
+                                    }
+                                      )),
+    pagination = FALSE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE,
+    height = 600,
+    width = 500)
+
+rtl_coor_tbl
+```
+
+```{r, include=TRUE}
+rtl_coor_tbl
+```
+
+### Normality Check {.tabset .tabset-fade .tabset-pills}
+
+#### Onset to RTL Completion 
+
+Extreme outliers present. 
+
+```{r, include=TRUE}
+qq_norm(final_rtl_rtp_data_3, onset_rtl_total_days)
+```
+
+### Models {.tabset .tabset-fade .tabset-pills}
+
+
+```{r, include=FALSE}
+total_symptom_model_2 <- lm(onset_rtl_total_days ~ total_symptom_score, data = model_data)
+
+arm::display(total_symptom_model_2)
+summary(total_symptom_model_2)
+
+
+rtl_gender_only_model <- lm(onset_rtl_total_days ~ gender, data = model_data)
+
+summary(rtl_gender_only_model)
+
+anova(total_symptom_model_2, rtl_gender_only_model)
+
+sundry::aic_weights(total_symptom_model_2, rtl_gender_only_model)
+
+# gender better fit than total symptom score
+
+rtl_age_only_model <- lm(onset_rtl_total_days ~ age, data = model_data)
+
+summary(rtl_age_only_model)
+
+
+rtl_total_symptom_model_gender <- lm(onset_rtl_total_days ~ total_symptom_score + gender,
+                                 data = model_data)
+
+summary(rtl_total_symptom_model_gender)
+
+rtl_total_symptom_model_age <- lm(onset_rtl_total_days ~ total_symptom_score + age,
+                                 data = model_data)
+
+summary(rtl_total_symptom_model_age)
+
+summary(total_symptom_model_2)$r.squared
+summary(rtl_total_symptom_model_gender)$r.squared
+summary(rtl_total_symptom_model_age)$r.squared
+
+summary(rtl_total_symptom_model_gender)$r.squared - summary(total_symptom_model_2)$r.squared
+
+
+sundry::aic_weights(total_symptom_model_2,
+                    rtl_total_symptom_model_gender,
+                    rtl_total_symptom_model_age,
+                    rtl_gender_only_model)
+
+# gender strongest predictor of RTL 
+
+
+#Individual symptom cluster long way
+
+rtl_cluster_mod_1 <- lm(onset_rtl_total_days ~ headache_migraine, data = model_data)
+summary(rtl_cluster_mod_1)
+
+rtl_cluster_mod_2 <- lm(onset_rtl_total_days ~ cognitive, data = model_data)
+summary(rtl_cluster_mod_2)
+
+rtl_cluster_mod_3 <- lm(onset_rtl_total_days ~ anxiety_mood, data = model_data)
+summary(rtl_cluster_mod_3)
+
+rtl_cluster_mod_4 <- lm(onset_rtl_total_days ~ ocular_motor, data = model_data)
+summary(rtl_cluster_mod_4)
+
+rtl_cluster_mod_5 <- lm(onset_rtl_total_days ~ vestibular, data = model_data)
+summary(rtl_cluster_mod_5)
+
+rtl_cluster_mod_6 <- lm(onset_rtl_total_days ~ sleep, data = model_data)
+summary(rtl_cluster_mod_6)
+
+
+sundry::aic_weights(rtl_cluster_mod_1,
+                    rtl_cluster_mod_2,
+                    rtl_cluster_mod_3,
+                    rtl_cluster_mod_4,
+                    rtl_cluster_mod_5,
+                    rtl_cluster_mod_6)
+
+# cognitive model best for predicting RTL duration 
+
+```
+
+#### Model 1
+
+Linear model of the relationship between total PCSS symptom score and the duration of time to complete RTL protocol. The coefficient of PCSS total symptom score is not significant, suggesting there is not a relationship between total PCSS symptom severity and duration of time to RTL. 
+
+```{r, include=TRUE}
+summary(total_symptom_model_2)
+```
+
+#### Model 2
+
+Linear regression model between gender and duration of time to complete RTL. The gender coefficient is not significant, suggesting the model is not a good fit. 
+
+
+```{r, include=TRUE}
+summary(rtl_gender_only_model)
+```
+
+#### Model 3
+
+Linear regression model between age and duration of time to complete RTL. The age coefficient is not significant, suggesting the model is not a good fit. 
+
+```{r, include=TRUE}
+summary(rtl_age_only_model)
+```
+
+#### Model 4
+
+Multiple regression model with PCSS total symptom score and gender as predictor variables. Neither coefficient is significant, suggesting the model is not a good fit. 
+
+```{r, include=TRUE}
+summary(rtl_total_symptom_model_gender)
+```
+
+#### Model 5
+
+Multiple regression model with PCSS total symptom score and age as predictor variables. Neither coefficient is significant, suggesting the model is not a good fit. 
+
+```{r, include=TRUE}
+summary(rtl_total_symptom_model_age)
+```
+
+#### Models 1-5 Comparison
+
+The gender model has the lowest AIC value (as indicated by the "delta" value), suggested it is the strongest model of the five compared. Lower AIC values indicate stronger model fit. However, none of the individal models are significant, likely due to the large amount of variance in the outcome variable (RTL duration).
+
+```{r, include=TRUE}
+sundry::aic_weights(total_symptom_model_2,
+                    rtl_gender_only_model,
+                    rtl_age_only_model,
+                    rtl_total_symptom_model_gender,
+                    rtl_total_symptom_model_age)
+```
+
+#### Model 6
+
+Linear model between the headache-migraine symptoms cluster score and duration of time to complete RTL protocol. The headache-migraine coefficient is not significant, suggesting this model is not a good fit. 
+
+```{r, include=TRUE}
+summary(rtl_cluster_mod_1)
+```
+
+#### Model 7
+
+Linear model between the cognitive symptoms cluster score and duration of time to complete RTL protocol. The cognitive coefficient is not significant, suggesting this model is not a good fit. 
+
+```{r, include=TRUE}
+summary(rtl_cluster_mod_2)
+```
+
+
+#### Model 8
+
+Linear model between the anxiety-mood symptoms cluster score and duration of time to complete RTL protocol. The anxiety-mood coefficient is not significant, suggesting this model is not a good fit. 
+
+```{r, include=TRUE}
+summary(rtl_cluster_mod_3)
+```
+
+#### Model 9
+
+Linear model between the ocular-motor symptoms cluster score and duration of time to complete RTL protocol. The ocular-motor coefficient is not significant, suggesting this model is not a good fit. 
+
+```{r, include=TRUE}
+summary(rtl_cluster_mod_4)
+```
+
+
+#### Model 10
+
+Linear model between the vestibular symptoms cluster score and duration of time to complete RTL protocol. The vestibular coefficient is not significant, suggesting this model is not a good fit. 
+
+```{r, include=TRUE}
+summary(rtl_cluster_mod_5)
+```
+
+
+#### Model 11
+
+Linear model between the sleep symptoms cluster score and duration of time to complete RTL protocol. The sleep coefficient is not significant, suggesting this model is not a good fit. 
+
+```{r, include=TRUE}
+summary(rtl_cluster_mod_6)
+```
+
+
+#### Symptom Cluster Model Comparison
+
+The cognitive symptom cluster appears to be the strongest model and individual symptom cluster predictor of RTL duration; however, no individual model for symptom cluster or total PCSS score is significant to justify a relationship between PCSS symptom severity at the time of ImPACT testing and RTL duration. The lack of a relationship is likely due to the presence of outliers and variance in RTL duration across the sample size. 
+
+```{r, include=TRUE}
+sundry::aic_weights(rtl_cluster_mod_1,
+                    rtl_cluster_mod_2,
+                    rtl_cluster_mod_3,
+                    rtl_cluster_mod_4,
+                    rtl_cluster_mod_5,
+                    rtl_cluster_mod_6)
 ```
